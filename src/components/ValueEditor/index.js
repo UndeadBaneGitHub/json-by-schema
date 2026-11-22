@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 
@@ -80,6 +80,7 @@ getSelect.propTypes = {
 };
 
 function JsonAceEditor({ strValue, onChange }) {
+  const containerRef = useRef(null);
   const [isDark, setIsDark] = useState(
     () =>
       typeof document !== 'undefined' &&
@@ -88,41 +89,55 @@ function JsonAceEditor({ strValue, onChange }) {
 
   useEffect(() => {
     if (typeof document === 'undefined') return undefined;
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains('dark'));
-    });
+    const checkDark = () => {
+      const hasDarkAncestor = containerRef.current
+        ? Boolean(containerRef.current.closest('.dark'))
+        : document.documentElement.classList.contains('dark');
+      setIsDark(hasDarkAncestor);
+    };
+    checkDark();
+    const observer = new MutationObserver(checkDark);
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class'],
     });
+    const jbsRoot = containerRef.current && containerRef.current.closest('.json-by-schema');
+    if (jbsRoot && jbsRoot !== document.documentElement) {
+      observer.observe(jbsRoot, {
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+    }
     return () => observer.disconnect();
   }, []);
 
   return (
-    <AceEditor
-      mode="json"
-      theme={isDark ? 'tomorrow_night' : 'github'}
-      name="json-property-editor"
-      onChange={onJsonEditorChange(onChange)}
-      fontSize={14}
-      showPrintMargin
-      showGutter
-      highlightActiveLine
-      value={strValue}
-      setOptions={{
-        showLineNumbers: true,
-        tabSize: 2,
-      }}
-      minLines={25}
-      maxLines={120}
-      wrapEnabled
-      style={{
-        width: '100%',
-        borderRadius: '10px',
-        backgroundColor: isDark ? '#1d1f21' : '#f2f2f7',
-      }}
-      editorProps={{ $blockScrolling: true }}
-    />
+    <div ref={containerRef}>
+      <AceEditor
+        mode="json"
+        theme={isDark ? 'tomorrow_night' : 'github'}
+        name="json-property-editor"
+        onChange={onJsonEditorChange(onChange)}
+        fontSize={14}
+        showPrintMargin
+        showGutter
+        highlightActiveLine
+        value={strValue}
+        setOptions={{
+          showLineNumbers: true,
+          tabSize: 2,
+        }}
+        minLines={25}
+        maxLines={120}
+        wrapEnabled
+        style={{
+          width: '100%',
+          borderRadius: '10px',
+          backgroundColor: isDark ? '#1d1f21' : '#f2f2f7',
+        }}
+        editorProps={{ $blockScrolling: true }}
+      />
+    </div>
   );
 }
 

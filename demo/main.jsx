@@ -265,7 +265,7 @@ function DemoApp() {
       style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif' }}
     >
       {/* Top Bar */}
-      <header className="flex items-center justify-between px-4 py-2.5 bg-white dark:bg-[#1c1c1e] border-b border-[#c6c6c8]/60 dark:border-[#38383a] flex-shrink-0">
+      <header className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 bg-white dark:bg-[#1c1c1e] border-b border-[#c6c6c8]/60 dark:border-[#38383a] flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <span className="text-[15px] font-semibold tracking-tight">
             json-by-schema
@@ -276,31 +276,93 @@ function DemoApp() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            disabled={!hasChanges}
-            onClick={handleGlobalRevert}
-            className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors ${
-              hasChanges
-                ? 'border-[#c6c6c8] dark:border-[#38383a] text-black dark:text-white hover:bg-[#f2f2f7] dark:hover:bg-[#2c2c2e] cursor-pointer'
-                : 'border-transparent text-[#8e8e93] opacity-50 cursor-not-allowed'
-            }`}
-          >
-            Revert changes
-          </button>
-          <button
-            type="button"
-            disabled={!hasChanges}
-            onClick={handleGlobalSave}
-            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-opacity ${
-              hasChanges
-                ? 'bg-[#007aff] dark:bg-[#0a84ff] text-white cursor-pointer hover:opacity-90'
-                : 'bg-[#8e8e93]/20 text-[#8e8e93] cursor-not-allowed'
-            }`}
-          >
-            Save
-          </button>
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center rounded-full bg-[#767680]/15 dark:bg-[#767680]/25 p-0.5">
+            {THEME_PRESETS.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => setThemePreset(preset)}
+                className={`px-2.5 py-1 rounded-full text-[12px] font-medium capitalize transition-colors cursor-pointer ${
+                  themePreset === preset
+                    ? 'bg-white dark:bg-[#3a3a3c] text-black dark:text-white shadow-sm'
+                    : 'text-[#3c3c43]/70 dark:text-[#ebebf5]/60 hover:text-black dark:hover:text-white'
+                }`}
+              >
+                {PRESET_LABELS[preset] || preset}
+              </button>
+            ))}
+          </div>
+
+          <div className="w-px h-5 bg-black/10 dark:bg-white/15" />
+
+          <div className="flex items-center gap-2">
+            <span className="text-[#3c3c43] dark:text-[#ebebf5]/80 flex items-center" aria-hidden="true">
+              {darkMode ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+              )}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={darkMode}
+              aria-label="Toggle dark mode"
+              onClick={() => setDarkMode((prev) => !prev)}
+              className={`relative inline-flex h-[24px] w-[42px] flex-shrink-0 cursor-pointer rounded-full p-[2px] transition-colors duration-200 ease-in-out focus:outline-none ${
+                darkMode ? 'bg-[#34c759]' : 'bg-[#e9e9ea]'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-[20px] w-[20px] transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
+                  darkMode ? 'translate-x-[18px]' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="w-px h-5 bg-black/10 dark:bg-white/15" />
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={!hasChanges}
+              onClick={handleGlobalRevert}
+              className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors ${
+                hasChanges
+                  ? 'border-[#c6c6c8] dark:border-[#38383a] text-black dark:text-white hover:bg-[#f2f2f7] dark:hover:bg-[#2c2c2e] cursor-pointer'
+                  : 'border-transparent text-[#8e8e93] opacity-50 cursor-not-allowed'
+              }`}
+            >
+              Revert changes
+            </button>
+            <button
+              type="button"
+              disabled={!hasChanges}
+              onClick={handleGlobalSave}
+              className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-opacity ${
+                hasChanges
+                  ? 'bg-[#007aff] dark:bg-[#0a84ff] text-white cursor-pointer hover:opacity-90'
+                  : 'bg-[#8e8e93]/20 text-[#8e8e93] cursor-not-allowed'
+              }`}
+            >
+              Save
+            </button>
+          </div>
         </div>
       </header>
 
@@ -312,6 +374,7 @@ function DemoApp() {
             config={savedConfig}
             path={path}
             theme={themePreset}
+            darkMode={darkMode}
             onChange={(nextConfig) => setDraftConfig(nextConfig)}
             onPathChange={(nextPath) => setPath(nextPath)}
           />
@@ -359,7 +422,7 @@ function DemoApp() {
             }`}
           />
 
-          <div className="flex-1 min-h-0 p-4 pb-16 overflow-auto">
+          <div className="flex-1 min-h-0 p-4 overflow-auto">
             <h3 className="mt-0 mb-2.5 text-[15px] font-semibold tracking-tight">
               JSON Schema
             </h3>
@@ -367,48 +430,6 @@ function DemoApp() {
               {JSON.stringify(sampleSchema, null, 2)}
             </pre>
           </div>
-        </div>
-      </div>
-
-      {/* Floating Theme Preset & Dark Mode Controls */}
-      <div className="fixed bottom-5 right-5 z-50 flex items-center gap-3 px-3.5 py-2 rounded-full backdrop-blur-md bg-white/85 dark:bg-[#1c1c1e]/85 border border-black/10 dark:border-white/15 shadow-lg">
-        <div className="flex items-center rounded-full bg-[#767680]/15 dark:bg-[#767680]/25 p-0.5">
-          {THEME_PRESETS.map((preset) => (
-            <button
-              key={preset}
-              type="button"
-              onClick={() => setThemePreset(preset)}
-              className={`px-2.5 py-1 rounded-full text-[12px] font-medium capitalize transition-colors cursor-pointer ${
-                themePreset === preset
-                  ? 'bg-white dark:bg-[#3a3a3c] text-black dark:text-white shadow-sm'
-                  : 'text-[#3c3c43]/70 dark:text-[#ebebf5]/60 hover:text-black dark:hover:text-white'
-              }`}
-            >
-              {PRESET_LABELS[preset] || preset}
-            </button>
-          ))}
-        </div>
-        <div className="w-px h-5 bg-black/10 dark:bg-white/15" />
-        <div className="flex items-center gap-2">
-          <span className="text-[13px] font-medium text-[#3c3c43] dark:text-[#ebebf5]/80 select-none">
-            {darkMode ? 'Dark' : 'Light'}
-          </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={darkMode}
-            aria-label="Toggle dark mode"
-            onClick={() => setDarkMode((prev) => !prev)}
-            className={`relative inline-flex h-[28px] w-[48px] flex-shrink-0 cursor-pointer rounded-full p-[2px] transition-colors duration-200 ease-in-out focus:outline-none ${
-              darkMode ? 'bg-[#34c759]' : 'bg-[#e9e9ea]'
-            }`}
-          >
-            <span
-              className={`pointer-events-none inline-block h-[24px] w-[24px] transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
-                darkMode ? 'translate-x-[20px]' : 'translate-x-0'
-              }`}
-            />
-          </button>
         </div>
       </div>
     </div>

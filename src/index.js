@@ -42,6 +42,7 @@ function JsonBySchema(props) {
           customValidators={props.customValidators}
           deltaDepth={props.deltaDepth}
           theme={props.theme}
+          darkMode={props.darkMode}
         />
       </IntlProvider>
     </Provider>
@@ -57,6 +58,7 @@ JsonBySchema.propTypes = {
   customValidators: PropTypes.arrayOf(PropTypes.func),
   deltaDepth: PropTypes.number,
   theme: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  darkMode: PropTypes.bool,
 };
 
 export { JsonBySchema };
