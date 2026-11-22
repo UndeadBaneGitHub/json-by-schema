@@ -2,6 +2,7 @@
  * Test store addons
  */
 
+import { compose as reduxCompose } from 'redux';
 import configureStore from '../configureStore';
 
 describe('configureStore', () => {
@@ -33,8 +34,8 @@ describe('configureStore', () => {
 describe('configureStore params', () => {
   it('should call window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__', () => {
     /* eslint-disable no-underscore-dangle */
-    const compose = jest.fn();
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = () => compose;
+    const compose = vi.fn(reduxCompose);
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = compose;
     configureStore(undefined);
     expect(compose).toHaveBeenCalled();
     /* eslint-enable */

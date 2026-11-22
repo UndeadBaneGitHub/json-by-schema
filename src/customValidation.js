@@ -30,7 +30,7 @@ function CustomValidationError({
   this.stack = this.toString();
 }
 
-CustomValidationError.prototype.toString = function toString() {
+CustomValidationError.prototype.toString = function formatError() {
   return `${this.propertyPath} ${this.message}`;
 };
 
@@ -80,7 +80,7 @@ CustomValidationResult.prototype.addError = function addError({
 function stringizer(v, i) {
   return `${i}: ${v.toString()}\n`;
 }
-CustomValidationResult.prototype.toString = function toString() {
+CustomValidationResult.prototype.toString = function formatResult() {
   return this.errors.map(stringizer).join('');
 };
 

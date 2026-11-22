@@ -360,7 +360,7 @@ function* deleteConfig(action) {
 
     if (Array.isArray(parentConfig)) {
       config = [...parentConfig];
-      if (+propName === +propName) {
+      if (!Number.isNaN(+propName)) {
         config.splice(+propName, 1);
       } else {
         delete config[propName];

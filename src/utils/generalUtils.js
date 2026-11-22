@@ -45,7 +45,7 @@ export function isFunction(value) {
 }
 
 export function isNumber(val) {
-  return +val === +val;
+  return !Number.isNaN(+val);
 }
 
 export function isString(value) {

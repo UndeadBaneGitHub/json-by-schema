@@ -4,7 +4,7 @@
  *
  */
 
-import { fromJS, Map } from 'immutable';
+import { fromJS, Map as ImmutableMap } from 'immutable';
 
 import { assurePath } from '../../utils/schemaUtils';
 
@@ -59,7 +59,7 @@ function objectPanelReducer(state = initialState, action) {
     }
     case SELECT_SCHEMA: {
       const { schemaIndexes } = action;
-      const baseState = Map.isMap(state.get(path))
+      const baseState = ImmutableMap.isMap(state.get(path))
         ? state
         : state.set(path, initialPanelState);
 

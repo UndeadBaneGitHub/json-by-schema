@@ -14,7 +14,7 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:5173',
-    channel: 'chrome',
+    ...(process.env.CI ? {} : { channel: 'chrome' }),
     viewport: { width: 1440, height: 900 },
     trace: 'on-first-retry',
   },

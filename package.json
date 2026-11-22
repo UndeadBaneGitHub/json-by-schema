@@ -35,7 +35,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
-    "lint": "eslint src"
+    "lint": "biome lint src demo e2e",
+    "format": "biome format --write src demo e2e",
+    "check": "biome check --write src demo e2e"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -64,12 +66,12 @@
     "scroll-into-view-if-needed": "^3.1.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.6.8",
     "@playwright/test": "^1.65.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.7.0",
-    "eslint": "^9.15.0",
     "jsdom": "^25.0.1",
     "postcss": "^8.5.33",
     "tailwindcss": "^3.4.19",
