@@ -228,6 +228,9 @@ export class PropertyEditor extends React.PureComponent {
             strValue={this.props.strNewValue}
             type={this.props.schema.type}
             enum={this.props.schema.enum}
+            minimum={this.props.schema.minimum}
+            maximum={this.props.schema.maximum}
+            multipleOf={this.props.schema.multipleOf}
             jsonEditor={this.props.jsonEditor}
             onChange={this.onChange}
             onSubmit={this.onSubmit}

@@ -95,7 +95,16 @@ export function getSchemaForPropertyName(schema, propName, rootSchema) {
 
   switch (schema.type) {
     case 'array': {
-      return schema.items;
+      if (Array.isArray(schema.items)) {
+        const idx = Number(propName);
+        if (idx >= 0 && idx < schema.items.length) {
+          return deRefSchema(schema.items[idx], rootSchema);
+        }
+        return schema.additionalItems && typeof schema.additionalItems === 'object'
+          ? deRefSchema(schema.additionalItems, rootSchema)
+          : false;
+      }
+      return deRefSchema(schema.items, rootSchema);
     }
     case 'object': {
       let res = false;

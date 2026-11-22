@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { injectIntl, FormattedMessage } from 'react-intl';
-import Select from 'react-select';
+import IosSelect from '../IosSelect';
 
 import {
   generateIdPrefixFromPath,
@@ -45,7 +45,6 @@ function SchemaSelector(props) {
   const schemaChoices = getMultipleChoiceSchemaChoices(props.schema);
 
   const options = renderOptions(props);
-  const selectedOption = options.find((opt) => opt.value === props.schemaIndex) || null;
 
   return (
     <Wrapper key={`${idPrefix}schema-selector`} onClick={stopPropagation}>
@@ -53,47 +52,12 @@ function SchemaSelector(props) {
         <FormattedMessage {...messages[schemaChoices.type]} />
       </PrefixWrapper>
       <SelectorWrapper>
-        <Select
+        <IosSelect
           onChange={(option) => props.onChange(option || { value: -1 })}
-          value={selectedOption}
+          value={props.schemaIndex}
           options={options}
           placeholder={props.intl.formatMessage(messages.unselectedMessage)}
           isClearable
-          styles={{
-            control: (base) => ({
-              ...base,
-              backgroundColor: 'var(--jbs-bg)',
-              borderColor: 'var(--jbs-border)',
-              borderRadius: '10px',
-              boxShadow: 'none',
-            }),
-            menu: (base) => ({
-              ...base,
-              zIndex: 15,
-              backgroundColor: 'var(--jbs-bg)',
-              border: '1px solid var(--jbs-border)',
-              borderRadius: '10px',
-              overflow: 'hidden',
-            }),
-            option: (base, state) => ({
-              ...base,
-              backgroundColor: state.isSelected
-                ? 'var(--jbs-accent)'
-                : state.isFocused
-                  ? 'var(--jbs-bg-secondary)'
-                  : 'transparent',
-              color: state.isSelected ? '#ffffff' : 'var(--jbs-text)',
-            }),
-            singleValue: (base) => ({
-              ...base,
-              color: 'var(--jbs-text)',
-            }),
-            input: (base) => ({
-              ...base,
-              color: 'var(--jbs-text)',
-            }),
-          }}
-          autoFocus
         />
       </SelectorWrapper>
     </Wrapper>
