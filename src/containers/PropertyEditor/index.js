@@ -15,7 +15,12 @@ import Highlighter from 'react-highlight-words';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 import { genId, stopPropagation, scrollPanelIntoView } from '../../utils/generalUtils';
-import { isValueTypeMatch, setValueType, validateConfig } from '../../utils/schemaUtils';
+import {
+  generateDefaultValueForProperty,
+  isValueTypeMatch,
+  setValueType,
+  validateConfig,
+} from '../../utils/schemaUtils';
 
 import ValueEditor from '../../components/ValueEditor';
 import ErrorMessage from '../../components/ErrorMessage';
@@ -46,6 +51,20 @@ export class PropertyEditor extends React.PureComponent {
   constructor(props) {
     super(props);
 
+    this.userModified = false;
+
+    this.getInitialEditorValue = (config, schema) => {
+      if (
+        schema &&
+        schema.type === 'boolean' &&
+        typeof config !== 'boolean' &&
+        !(config === null && schema.allowsNull)
+      ) {
+        return generateDefaultValueForProperty(schema);
+      }
+      return config;
+    };
+
     this.getConfigString = (config) => {
       if (
         this.props.jsonEditor ||
@@ -65,16 +84,25 @@ export class PropertyEditor extends React.PureComponent {
     this.onRevert = (evt) => {
       stopPropagation(evt);
 
-      this.props.changeNewPropertyValue(
+      this.userModified = false;
+      const initialVal = this.getInitialEditorValue(
         this.props.config,
-        this.getConfigString(this.props.config),
+        this.props.schema,
+      );
+      this.props.changeNewPropertyValue(
+        initialVal,
+        this.getConfigString(initialVal),
         this.props.path,
       );
+      if (this.context && this.context.setUnsavedState) {
+        this.context.setUnsavedState(false, null);
+      }
     };
 
     this.onChange = (evt) => {
       stopPropagation(evt);
 
+      this.userModified = true;
       const isExplicitNull =
         evt.target.value === null && this.props.schema.allowsNull;
       const nextValue = isExplicitNull
@@ -104,6 +132,7 @@ export class PropertyEditor extends React.PureComponent {
         return;
       }
 
+      this.userModified = false;
       this.props.updateConfigForPath(this.props.newValue, this.props.path);
       if (this.context && this.context.setUnsavedState) {
         this.context.setUnsavedState(false, null);
@@ -123,14 +152,22 @@ export class PropertyEditor extends React.PureComponent {
 
   syncUnsavedState() {
     if (this.context && this.context.setUnsavedState) {
-      this.context.setUnsavedState(this.isFieldDirty(), () => this.onRevert());
+      this.context.setUnsavedState(
+        Boolean(this.userModified && this.isFieldDirty()),
+        () => this.onRevert(),
+      );
     }
   }
 
   componentDidMount() {
-    this.props.changeNewPropertyValue(
+    this.userModified = false;
+    const initialVal = this.getInitialEditorValue(
       this.props.config,
-      this.getConfigString(this.props.config),
+      this.props.schema,
+    );
+    this.props.changeNewPropertyValue(
+      initialVal,
+      this.getConfigString(initialVal),
       this.props.path,
     );
     if (this.context && this.context.setUnsavedState) {
@@ -140,10 +177,19 @@ export class PropertyEditor extends React.PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.path !== this.props.path || prevProps.schema !== this.props.schema) {
-      this.props.changeNewPropertyValue(
+    if (
+      prevProps.path !== this.props.path ||
+      prevProps.schema !== this.props.schema ||
+      prevProps.config !== this.props.config
+    ) {
+      this.userModified = false;
+      const initialVal = this.getInitialEditorValue(
         this.props.config,
-        this.getConfigString(this.props.config),
+        this.props.schema,
+      );
+      this.props.changeNewPropertyValue(
+        initialVal,
+        this.getConfigString(initialVal),
         this.props.path,
       );
       if (this.context && this.context.setUnsavedState) {

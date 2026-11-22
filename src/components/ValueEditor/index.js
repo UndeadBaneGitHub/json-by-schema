@@ -13,9 +13,9 @@ import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/theme-tomorrow_night';
 import 'ace-builds/src-noconflict/mode-json';
 
-import * as Switch from '@radix-ui/react-switch';
-import * as Slider from '@radix-ui/react-slider';
-import IosSelect from '../IosSelect';
+import { Switch } from '@base-ui/react/switch';
+import { Slider } from '@base-ui/react/slider';
+import Combobox from '../Combobox';
 import { isValueTypeMatch } from '../../utils/schemaUtils';
 
 import messages from './messages';
@@ -60,7 +60,7 @@ onJsonEditorChange.propTypes = {
 
 function getSelect(props, options) {
   return (
-    <IosSelect
+    <Combobox
       onChange={onSelectChange(props.onChange)}
       value={props.value}
       options={options}
@@ -285,21 +285,23 @@ function getEditor(props) {
                 min={props.minimum}
                 max={props.maximum}
                 step={sliderStep}
-                value={[clampedVal]}
-                onValueChange={([nextVal]) =>
+                value={clampedVal}
+                onValueChange={(nextVal) => {
+                  const resolved = Array.isArray(nextVal) ? nextVal[0] : nextVal;
                   props.onChange({
-                    target: { value: String(nextVal), strValue: String(nextVal) },
-                  })
-                }
-                className="relative flex items-center select-none touch-none w-full h-5 cursor-pointer"
+                    target: { value: String(resolved), strValue: String(resolved) },
+                  });
+                }}
               >
-                <Slider.Track className="bg-[var(--jbs-input-bg)] relative grow rounded-full h-[4px]">
-                  <Slider.Range className="absolute bg-[var(--jbs-accent)] rounded-full h-full" />
-                </Slider.Track>
-                <Slider.Thumb
-                  aria-label="Numeric value slider"
-                  className="block w-5 h-5 bg-white border border-black/10 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--jbs-accent)]/40"
-                />
+                <Slider.Control className="relative flex items-center select-none touch-none w-full h-5 cursor-pointer">
+                  <Slider.Track className="bg-[var(--jbs-input-bg)] relative grow rounded-full h-[4px]">
+                    <Slider.Indicator className="absolute bg-[var(--jbs-accent)] rounded-full h-full" />
+                    <Slider.Thumb
+                      aria-label="Numeric value slider"
+                      className="block w-5 h-5 bg-white border border-black/10 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--jbs-accent)]/40"
+                    />
+                  </Slider.Track>
+                </Slider.Control>
               </Slider.Root>
               <div className="flex justify-between text-[11px] text-[var(--jbs-text-secondary)]">
                 <span>{props.minimum}</span>

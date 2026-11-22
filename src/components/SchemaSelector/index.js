@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { injectIntl, FormattedMessage } from 'react-intl';
-import IosSelect from '../IosSelect';
+import Combobox from '../Combobox';
 
 import {
   generateIdPrefixFromPath,
@@ -53,7 +53,7 @@ function SchemaSelector(props) {
         <FormattedMessage {...messages[schemaChoices.type]} />
       </PrefixWrapper>
       <SelectorWrapper>
-        <IosSelect
+        <Combobox
           onChange={(option) => props.onChange(option || { value: -1 })}
           value={props.schemaIndex}
           options={options}

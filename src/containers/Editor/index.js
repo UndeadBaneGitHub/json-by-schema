@@ -11,6 +11,8 @@ import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
 import ImmutableProptypes from 'react-immutable-proptypes';
 import { List } from 'immutable';
+import { AlertDialog } from '@base-ui/react/alert-dialog';
+import { Switch } from '@base-ui/react/switch';
 
 import injectReducer from '../../utils/injectReducer';
 import { getSelectedSchema } from '../../utils/schemaUtils';
@@ -46,6 +48,7 @@ export class Editor extends React.PureComponent {
       }
     }
     this.unsavedState = { hasUnsaved: false, discard: null };
+    this.rootRef = React.createRef();
     this.state = {
       internalDarkMode: initialDark,
       pendingNavigation: null,
@@ -169,26 +172,27 @@ export class Editor extends React.PureComponent {
           guardNavigation: this.guardNavigation,
         }}
       >
-        <Wrapper className={rootClassName} {...themeProps}>
+        <Wrapper ref={this.rootRef} className={rootClassName} {...themeProps}>
           <ObjectPanel {...configPanelProps} />
-          {this.state.pendingNavigation && (
-            <div
-              role="alertdialog"
-              aria-modal="true"
-              className="absolute inset-0 z-[90] flex items-center justify-center bg-black/30 dark:bg-black/55 backdrop-blur-[2px]"
-            >
-              <div className="w-[340px] max-w-[90%] rounded-[var(--jbs-radius-lg)] bg-[var(--jbs-popover-bg)] border border-[var(--jbs-border)] shadow-2xl p-5 text-[var(--jbs-text)]">
-                <p className="m-0 text-[15px] font-medium text-center mb-4">
+          <AlertDialog.Root
+            open={Boolean(this.state.pendingNavigation)}
+            onOpenChange={(open) => {
+              if (!open) this.handleCancelNavigation();
+            }}
+          >
+            <AlertDialog.Portal container={this.rootRef}>
+              <AlertDialog.Backdrop className="absolute inset-0 z-[90] bg-black/30 dark:bg-black/55 backdrop-blur-[2px]" />
+              <AlertDialog.Popup className="absolute z-[91] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] max-w-[90%] rounded-[var(--jbs-radius-lg)] bg-[var(--jbs-popover-bg)] border border-[var(--jbs-border)] shadow-2xl p-5 text-[var(--jbs-text)] outline-none">
+                <AlertDialog.Description className="m-0 text-[15px] font-medium text-center mb-4">
                   You have unsaved changes.
-                </p>
+                </AlertDialog.Description>
                 <div className="flex items-center justify-end gap-2">
-                  <button
-                    type="button"
+                  <AlertDialog.Close
                     onClick={this.handleCancelNavigation}
                     className="px-3.5 py-1.5 rounded-[var(--jbs-radius)] text-[13px] font-medium border border-[var(--jbs-border)] text-[var(--jbs-text)] hover:bg-[var(--jbs-bg-hover)] cursor-pointer"
                   >
                     Cancel
-                  </button>
+                  </AlertDialog.Close>
                   <button
                     type="button"
                     onClick={this.handleProceedAndUndo}
@@ -197,9 +201,9 @@ export class Editor extends React.PureComponent {
                     Proceed and undo changes
                   </button>
                 </div>
-              </div>
-            </div>
-          )}
+              </AlertDialog.Popup>
+            </AlertDialog.Portal>
+          </AlertDialog.Root>
           {!isControlled && (
           <div className="absolute bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md bg-[var(--jbs-popover-bg)] border border-[var(--jbs-border)] shadow-lg">
             <span className="text-[var(--jbs-text-secondary)] flex items-center" aria-hidden="true">
@@ -221,22 +225,20 @@ export class Editor extends React.PureComponent {
                 </svg>
               )}
             </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={isDark}
+            <Switch.Root
+              checked={isDark}
+              onCheckedChange={this.toggleInternalDarkMode}
               aria-label="Toggle dark mode"
-              onClick={this.toggleInternalDarkMode}
               className={`relative inline-flex h-[24px] w-[42px] flex-shrink-0 cursor-pointer rounded-full p-[2px] transition-colors duration-200 ease-in-out focus:outline-none ${
                 isDark ? 'bg-[var(--jbs-switch-on)]' : 'bg-[var(--jbs-switch-off)]'
               }`}
             >
-              <span
+              <Switch.Thumb
                 className={`pointer-events-none inline-block h-[20px] w-[20px] transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
                   isDark ? 'translate-x-[18px]' : 'translate-x-0'
                 }`}
               />
-            </button>
+            </Switch.Root>
           </div>
         )}
         </Wrapper>

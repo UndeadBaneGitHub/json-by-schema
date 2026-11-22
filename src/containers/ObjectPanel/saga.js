@@ -241,9 +241,14 @@ export function* updatePanels() {
           openProperty.config === null &&
           openProperty.schema &&
           openProperty.schema.allowsNull;
+        const isExistingPrimitive =
+          openProperty.hasConfigValue &&
+          openProperty.schema &&
+          !['object', 'array'].includes(openProperty.schema.type);
 
         if (
           !isAllowedNull &&
+          !isExistingPrimitive &&
           isConfigEmpty(openProperty.config, openProperty.schema)
         ) {
           // to prevent types collision, if config is empty,

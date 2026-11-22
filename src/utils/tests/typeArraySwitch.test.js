@@ -14,7 +14,7 @@ describe('type array nullable switch', () => {
       },
       patternProperties: {
         '^x-': {
-          type: ['string', 'integer', 'null'],
+          type: ['string', 'integer', 'boolean', 'null'],
         },
       },
     };
@@ -38,7 +38,7 @@ describe('type array nullable switch', () => {
     const combobox1 = await screen.findByRole('combobox', {}, { timeout: 5000 });
     fireEvent.focus(combobox1);
     const stringOpt = await screen.findByRole('option', { name: 'string' });
-    fireEvent.mouseDown(stringOpt);
+    fireEvent.click(stringOpt);
 
     // Set value to "KAPPA" and Save
     await waitFor(() => {
@@ -77,7 +77,7 @@ describe('type array nullable switch', () => {
     const combobox2 = await screen.findByRole('combobox');
     fireEvent.focus(combobox2);
     const integerOpt = await screen.findByRole('option', { name: 'integer' });
-    fireEvent.mouseDown(integerOpt);
+    fireEvent.click(integerOpt);
 
     // PropertyEditor should now show number input
     await waitFor(() => {
@@ -94,7 +94,7 @@ describe('type array nullable switch', () => {
     const combobox3 = await screen.findByRole('combobox');
     fireEvent.focus(combobox3);
     const stringOpt2 = await screen.findByRole('option', { name: 'string' });
-    fireEvent.mouseDown(stringOpt2);
+    fireEvent.click(stringOpt2);
 
     // String editor should show 123 as placeholder, empty value, and no validation error
     await waitFor(() => {
@@ -103,6 +103,26 @@ describe('type array nullable switch', () => {
       expect(ta.value).toBe('');
       expect(ta.getAttribute('placeholder')).toBe('123');
       expect(document.body.textContent).not.toContain('is not of a type');
+    }, { timeout: 5000 });
+
+    // Switch from integer 123 to "boolean": shows "True" and Save is enabled to save true
+    const combobox4 = await screen.findByRole('combobox');
+    fireEvent.focus(combobox4);
+    const boolOpt = await screen.findByRole('option', { name: 'boolean' });
+    fireEvent.click(boolOpt);
+
+    await waitFor(() => {
+      const switches = screen.getAllByRole('switch');
+      expect(switches.length).toBeGreaterThanOrEqual(2);
+      expect(switches[0].getAttribute('aria-checked')).toBe('true');
+      const saveBoolBtn = screen.getByDisplayValue('Save');
+      expect(saveBoolBtn.disabled).toBe(false);
+      fireEvent.click(saveBoolBtn);
+    }, { timeout: 5000 });
+
+    await waitFor(() => {
+      const saveBoolBtn = screen.getByDisplayValue('Save');
+      expect(saveBoolBtn.disabled).toBe(true);
     }, { timeout: 5000 });
   }, 20000);
 });

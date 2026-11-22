@@ -57,13 +57,13 @@ test.describe('json-by-schema critical paths & visual checks', () => {
     await page.goto('/');
     await expect(page.getByText('serviceName').first()).toBeVisible();
 
-    // 1. Update schema so patternProperties ^x- allows ["string", "integer", "null"]
+    // 1. Update schema so patternProperties ^x- allows ["string", "integer", "boolean", "null"]
     await page.evaluate(() => {
       const editor = window.ace.edit('demo-schema-editor');
       const parsed = JSON.parse(editor.getValue());
       parsed.patternProperties = {
         '^x-': {
-          type: ['string', 'integer', 'null'],
+          type: ['string', 'integer', 'boolean', 'null'],
           description: 'Nullable multi-type pattern property',
         },
       };
@@ -122,6 +122,20 @@ test.describe('json-by-schema critical paths & visual checks', () => {
     await expect(backToStringTa).toHaveValue('');
     await expect(backToStringTa).toHaveAttribute('placeholder', '123');
     await expect(page.getByText(/is not of a type/i)).toHaveCount(0);
+
+    // 8. Switch to "boolean" while config is 123: shows "True", Save is enabled, and clicking Save updates JSON to true
+    await page.getByRole('combobox').first().click();
+    await page.getByRole('option', { name: 'boolean' }).click();
+    const boolSwitch = page.locator('.json-by-schema [role="switch"]').first();
+    await expect(boolSwitch).toHaveAttribute('aria-checked', 'true');
+    const saveBoolBtn = page.locator('input[type="submit"][value="Save"]');
+    await expect(saveBoolBtn).toBeEnabled();
+    await saveBoolBtn.click();
+
+    const outputJson = await page.evaluate(() =>
+      JSON.parse(window.ace.edit('demo-output-json').getValue()),
+    );
+    expect(outputJson['x-kappa']).toBe(true);
 
     expect(errors).toEqual([]);
   });
@@ -340,7 +354,7 @@ test.describe('json-by-schema critical paths & visual checks', () => {
     await page.getByPlaceholder(/property name/i).fill('flag_beta');
     await page.locator('input[type="submit"][value="Save"]').first().click();
 
-    const boolSwitch = page.locator('.json-by-schema button[role="switch"]').first();
+    const boolSwitch = page.locator('.json-by-schema [role="switch"]').first();
     await expect(boolSwitch).toBeVisible();
     await expect(boolSwitch).toHaveAttribute('aria-checked', 'true');
     await boolSwitch.click();

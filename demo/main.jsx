@@ -4,6 +4,7 @@ import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/theme-tomorrow_night';
+import { Switch } from '@base-ui/react/switch';
 import { JsonBySchema, THEME_PRESETS } from '../src';
 
 const sampleSchema = {
@@ -398,22 +399,20 @@ function DemoApp() {
                 </svg>
               )}
             </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={darkMode}
+            <Switch.Root
+              checked={darkMode}
+              onCheckedChange={(nextChecked) => setDarkMode(nextChecked)}
               aria-label="Toggle dark mode"
-              onClick={() => setDarkMode((prev) => !prev)}
               className={`relative inline-flex h-[24px] w-[42px] flex-shrink-0 cursor-pointer rounded-full p-[2px] transition-colors duration-200 ease-in-out focus:outline-none ${
                 darkMode ? 'bg-[#34c759]' : 'bg-[#e9e9ea]'
               }`}
             >
-              <span
+              <Switch.Thumb
                 className={`pointer-events-none inline-block h-[20px] w-[20px] transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
                   darkMode ? 'translate-x-[18px]' : 'translate-x-0'
                 }`}
               />
-            </button>
+            </Switch.Root>
           </div>
 
           <div className="w-px h-5 bg-black/10 dark:bg-white/15" />
