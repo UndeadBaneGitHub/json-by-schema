@@ -14,6 +14,7 @@ import { List } from 'immutable';
 
 import injectReducer from '../../utils/injectReducer';
 import { getSelectedSchema } from '../../utils/schemaUtils';
+import { resolveThemeProps } from '../../theme';
 
 import ObjectPanel from '../../containers/ObjectPanel/Loadable';
 import { makeSelectSchemaIndexes } from '../../containers/ObjectPanel/selectors';
@@ -103,8 +104,10 @@ export class Editor extends React.PureComponent {
       name: '',
     };
 
+    const themeProps = resolveThemeProps(this.props.theme);
+
     return (
-      <Wrapper className={'json-by-schema'}>
+      <Wrapper className={'json-by-schema'} {...themeProps}>
         <ObjectPanel {...configPanelProps} />
       </Wrapper>
     );
@@ -144,6 +147,7 @@ Editor.propTypes = {
   path: PropTypes.string,
   internalPath: PropTypes.string.isRequired,
   updatePath: PropTypes.func.isRequired,
+  theme: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };
 
 const mapStateToProps = createStructuredSelector({

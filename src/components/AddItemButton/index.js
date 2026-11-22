@@ -22,6 +22,7 @@ function AddItemButton(props) {
       disabled={props.disabled}
       className={'text-button'}
     >
+      <span aria-hidden="true">+</span>
       <FormattedMessage {...messages.addItem} />
     </Wrapper>
   );

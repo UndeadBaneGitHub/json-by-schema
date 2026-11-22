@@ -241,7 +241,7 @@ export class ArrayItem extends React.PureComponent {
           </ItemInfoWrapper>
           <div>{this.renderSchemaSelector()}</div>
           <DragHandle />
-          <RemoveButton onClick={onRemove}>&times;</RemoveButton>
+          <RemoveButton onClick={onRemove} />
           <ItemButtonsWrapper>
             <RevertItemButton
               onClick={this.revertConfigChanges}

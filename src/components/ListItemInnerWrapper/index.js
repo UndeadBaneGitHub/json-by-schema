@@ -11,11 +11,11 @@ const ListItemInnerWrapper = ({
 }) => {
   const bgClass = expanded
     ? invalid
-      ? 'bg-[#ff3b30]/20 dark:bg-[#ff453a]/25'
-      : 'bg-[#e5e5ea] dark:bg-[#2c2c2e]'
+      ? 'bg-[var(--jbs-danger-bg)]'
+      : 'bg-[var(--jbs-bg-active)]'
     : invalid
-      ? 'bg-[#ff3b30]/10 dark:bg-[#ff453a]/15'
-      : 'bg-white dark:bg-[#1c1c1e] hover:bg-[#f2f2f7] dark:hover:bg-[#2c2c2e]/70';
+      ? 'bg-[var(--jbs-danger-bg)]'
+      : 'bg-[var(--jbs-bg)] hover:bg-[var(--jbs-bg-hover)]';
 
   const opacityClass = empty
     ? expanded
@@ -25,8 +25,8 @@ const ListItemInnerWrapper = ({
 
   const borderClass = expanded
     ? invalid
-      ? 'border-l-[3px] border-l-[#ff3b30] dark:border-l-[#ff453a]'
-      : 'border-l-[3px] border-l-[#007aff] dark:border-l-[#0a84ff]'
+      ? 'border-l-[3px] border-l-[var(--jbs-danger)]'
+      : 'border-l-[3px] border-l-[var(--jbs-accent)]'
     : '';
 
   return (

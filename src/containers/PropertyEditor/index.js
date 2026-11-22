@@ -19,7 +19,10 @@ import { setValueType, validateConfig } from '../../utils/schemaUtils';
 
 import ValueEditor from '../../components/ValueEditor';
 import ErrorMessage from '../../components/ErrorMessage';
-import { updateConfigForPath } from '../../containers/Editor/actions';
+import {
+  updateConfigForPath,
+  deleteConfigForPath,
+} from '../../containers/Editor/actions';
 import ItemNameWrapper from '../../components/ItemNameWrapper';
 import ItemInfoWrapper from '../../components/ItemInfoWrapper';
 import {
@@ -51,44 +54,73 @@ export class PropertyEditor extends React.PureComponent {
       return config === undefined ? '' : String(config);
     };
 
+    this.saveTimeout = null;
+
     this.onKeyDown = (evt) => {
       if (evt.key === 'Enter' && evt.ctrlKey) {
-        this.onSubmit(evt);
+        this.flushSave();
+      }
+    };
+
+    this.flushSave = () => {
+      if (this.saveTimeout) {
+        clearTimeout(this.saveTimeout);
+        this.saveTimeout = null;
+      }
+      if (!this.hasValidationErrors()) {
+        return;
+      }
+      if (!this.props.hasConfigValue || this.props.newValue !== this.props.config) {
+        this.props.updateConfigForPath(this.props.newValue, this.props.path);
       }
     };
 
     this.onRevert = (evt) => {
       stopPropagation(evt);
+      if (this.saveTimeout) {
+        clearTimeout(this.saveTimeout);
+        this.saveTimeout = null;
+      }
 
-      this.props.changeNewPropertyValue(
-        this.props.config,
-        this.getConfigString(this.props.config),
-        this.props.path,
-      );
+      const hasInitial =
+        this.props.hasInitialConfigValue !== undefined
+          ? this.props.hasInitialConfigValue
+          : this.props.initialConfig !== undefined;
+
+      if (hasInitial) {
+        this.props.changeNewPropertyValue(
+          this.props.initialConfig,
+          this.getConfigString(this.props.initialConfig),
+          this.props.path,
+        );
+        this.props.updateConfigForPath(this.props.initialConfig, this.props.path);
+      } else {
+        this.props.deleteConfigForPath(this.props.path);
+      }
     };
 
     this.onChange = (evt) => {
       stopPropagation(evt);
 
+      const nextValue = processInputValue(evt.target.value, this.props.schema.type);
+      const nextStrValue =
+        evt.target.strValue !== undefined
+          ? evt.target.strValue
+          : this.getConfigString(evt.target.value);
+
       this.props.changeNewPropertyValue(
-        processInputValue(evt.target.value, this.props.schema.type),
-        evt.target.strValue || this.getConfigString(evt.target.value),
+        nextValue,
+        nextStrValue,
         this.props.path,
       );
-    };
 
-    this.onSubmit = (evt) => {
-      stopPropagation(evt);
-
-      if (
-        (this.props.hasConfigValue &&
-          this.props.newValue === this.props.config) ||
-        !this.hasValidationErrors()
-      ) {
-        return;
+      if (this.saveTimeout) {
+        clearTimeout(this.saveTimeout);
       }
-
-      this.props.updateConfigForPath(this.props.newValue, this.props.path);
+      this.saveTimeout = setTimeout(() => {
+        this.saveTimeout = null;
+        this.flushSave();
+      }, 300);
     };
   }
 
@@ -103,12 +135,23 @@ export class PropertyEditor extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     if (prevProps.path !== this.props.path) {
+      if (this.saveTimeout) {
+        clearTimeout(this.saveTimeout);
+        this.saveTimeout = null;
+      }
       this.props.changeNewPropertyValue(
         this.props.config,
         this.getConfigString(this.props.config),
         this.props.path,
       );
       scrollPanelIntoView(this.panelRef);
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+      this.saveTimeout = null;
     }
   }
 
@@ -233,15 +276,18 @@ export class PropertyEditor extends React.PureComponent {
             multipleOf={this.props.schema.multipleOf}
             jsonEditor={this.props.jsonEditor}
             onChange={this.onChange}
-            onSubmit={this.onSubmit}
             onRevert={this.onRevert}
             onKeyDown={this.onKeyDown}
             disableButtons={{
-              revert: this.props.newValue === this.props.config,
-              submit:
-                (this.props.hasConfigValue &&
-                  this.props.newValue === this.props.config) ||
-                !this.hasValidationErrors(),
+              revert: (
+                this.props.hasInitialConfigValue !== undefined
+                  ? this.props.hasInitialConfigValue
+                  : this.props.initialConfig !== undefined
+              )
+                ? this.props.newValue === this.props.initialConfig ||
+                  JSON.stringify(this.props.newValue) ===
+                    JSON.stringify(this.props.initialConfig)
+                : !this.props.hasConfigValue,
             }}
           />
         </div>
@@ -281,8 +327,11 @@ PropertyEditor.propTypes = {
   name: PropTypes.string.isRequired,
   parentFilter: PropTypes.string.isRequired,
   updateConfigForPath: PropTypes.func.isRequired,
+  deleteConfigForPath: PropTypes.func.isRequired,
   changeNewPropertyValue: PropTypes.func.isRequired,
   hasConfigValue: PropTypes.bool.isRequired,
+  initialConfig: PropTypes.any,
+  hasInitialConfigValue: PropTypes.bool,
   isChild: PropTypes.bool.isRequired,
   jsonEditor: PropTypes.bool,
   customValidators: PropTypes.arrayOf(PropTypes.func),
@@ -313,6 +362,7 @@ const mapStateToProps = createStructuredSelector({
 const mapDispatchToProps = {
   changeNewPropertyValue,
   updateConfigForPath,
+  deleteConfigForPath,
 };
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

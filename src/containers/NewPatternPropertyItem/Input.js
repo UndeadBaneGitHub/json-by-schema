@@ -4,7 +4,7 @@ const Input = ({ className = '', ...rest }) => (
   <input
     type="text"
     autoFocus
-    className={`mt-1 mb-2 outline-none w-full bg-[#767680]/15 dark:bg-[#767680]/25 px-3 py-2 rounded-[10px] text-[14px] text-black dark:text-white placeholder:text-[#3c3c43]/60 dark:placeholder:text-[#ebebf5]/50 ${className}`}
+    className={`mt-1 mb-2 outline-none w-full bg-[var(--jbs-input-bg)] px-3 py-2 rounded-[var(--jbs-radius)] text-[14px] text-[var(--jbs-text)] placeholder:text-[var(--jbs-text-secondary)] ${className}`}
     {...rest}
   />
 );

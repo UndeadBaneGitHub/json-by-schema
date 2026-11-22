@@ -4,8 +4,9 @@ const Button = React.forwardRef(({ disabled, className = '', ...rest }, ref) => 
   <button
     ref={ref}
     type="button"
+    aria-label="Close"
     disabled={disabled}
-    className={`top-0 right-0 absolute px-[0.5em] py-[0.4em] text-[1.1em] ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${className}`}
+    className={`top-1 right-1.5 absolute p-1.5 flex items-center justify-center rounded-[var(--jbs-radius)] text-[var(--jbs-text-muted)] hover:text-[var(--jbs-text)] hover:bg-[var(--jbs-input-bg)] transition-colors ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'} ${className}`}
     {...rest}
   />
 ));

@@ -4,7 +4,7 @@ const ResetFilterButton = ({ className = '', ...rest }) => (
   <button
     type="button"
     aria-label="Clear filter"
-    className={`px-2 absolute right-2 top-0 bottom-0 flex items-center justify-center cursor-pointer text-[#8e8e93] hover:text-[#3c3c43] dark:hover:text-white transition-colors ${className}`}
+    className={`px-2 absolute right-2 top-0 bottom-0 flex items-center justify-center cursor-pointer text-[var(--jbs-text-muted)] hover:text-[var(--jbs-text)] transition-colors ${className}`}
     {...rest}
   >
     <svg

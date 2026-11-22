@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { JsonBySchema } from '../src';
+import { JsonBySchema, THEME_PRESETS } from '../src';
 
 const sampleSchema = {
   $schema: 'http://json-schema.org/draft-04/schema#',
@@ -184,17 +184,41 @@ const initialConfig = {
   'x-custom-header': 'enabled',
 };
 
+const PRESET_LABELS = {
+  ios: 'iOS',
+  nomad: 'Nomad',
+  github: 'GitHub',
+  kubernetes: 'K8s',
+  swagger: 'Swagger',
+};
+
 function DemoApp() {
-  const [config, setConfig] = useState(initialConfig);
+  const [savedConfig, setSavedConfig] = useState(initialConfig);
+  const [draftConfig, setDraftConfig] = useState(initialConfig);
+  const [editorKey, setEditorKey] = useState(0);
   const [path, setPath] = useState('');
   const [rightWidthPct, setRightWidthPct] = useState(33.33);
   const [topHeightPct, setTopHeightPct] = useState(50);
   const [dragging, setDragging] = useState(null); // 'horizontal' | 'vertical' | null
+  const [themePreset, setThemePreset] = useState(
+    () => localStorage.getItem('jbs-theme-preset') || 'ios',
+  );
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('jbs-dark-mode');
     if (saved !== null) return saved === 'true';
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+
+  const hasChanges = JSON.stringify(draftConfig) !== JSON.stringify(savedConfig);
+
+  const handleGlobalSave = () => {
+    setSavedConfig(draftConfig);
+  };
+
+  const handleGlobalRevert = () => {
+    setDraftConfig(savedConfig);
+    setEditorKey((k) => k + 1);
+  };
 
   const containerRef = useRef(null);
   const rightPaneRef = useRef(null);
@@ -203,6 +227,10 @@ function DemoApp() {
     document.documentElement.classList.toggle('dark', darkMode);
     localStorage.setItem('jbs-dark-mode', String(darkMode));
   }, [darkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('jbs-theme-preset', themePreset);
+  }, [themePreset]);
 
   useEffect(() => {
     if (!dragging) return undefined;
@@ -233,93 +261,155 @@ function DemoApp() {
 
   return (
     <div
-      ref={containerRef}
-      className={`flex h-screen bg-[#f2f2f7] dark:bg-black text-black dark:text-white ${dragging ? 'select-none' : ''}`}
+      className={`flex flex-col h-screen bg-[#f2f2f7] dark:bg-black text-black dark:text-white ${dragging ? 'select-none' : ''}`}
       style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif' }}
     >
-      <div className="json-by-schema relative flex-1 min-w-0 overflow-auto bg-[#f2f2f7] dark:bg-black">
-        <JsonBySchema
-          schema={sampleSchema}
-          config={config}
-          path={path}
-          onChange={(nextConfig) => setConfig(nextConfig)}
-          onPathChange={(nextPath) => setPath(nextPath)}
-        />
-      </div>
+      {/* Top Bar */}
+      <header className="flex items-center justify-between px-4 py-2.5 bg-white dark:bg-[#1c1c1e] border-b border-[#c6c6c8]/60 dark:border-[#38383a] flex-shrink-0">
+        <div className="flex items-center gap-2.5">
+          <span className="text-[15px] font-semibold tracking-tight">
+            json-by-schema
+          </span>
+          {hasChanges && (
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#ff9500]/15 text-[#c97600] dark:bg-[#ff9f0a]/20 dark:text-[#ffb340]">
+              Unsaved changes
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={!hasChanges}
+            onClick={handleGlobalRevert}
+            className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors ${
+              hasChanges
+                ? 'border-[#c6c6c8] dark:border-[#38383a] text-black dark:text-white hover:bg-[#f2f2f7] dark:hover:bg-[#2c2c2e] cursor-pointer'
+                : 'border-transparent text-[#8e8e93] opacity-50 cursor-not-allowed'
+            }`}
+          >
+            Revert changes
+          </button>
+          <button
+            type="button"
+            disabled={!hasChanges}
+            onClick={handleGlobalSave}
+            className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-opacity ${
+              hasChanges
+                ? 'bg-[#007aff] dark:bg-[#0a84ff] text-white cursor-pointer hover:opacity-90'
+                : 'bg-[#8e8e93]/20 text-[#8e8e93] cursor-not-allowed'
+            }`}
+          >
+            Save
+          </button>
+        </div>
+      </header>
 
-      <div
-        role="separator"
-        aria-orientation="vertical"
-        onMouseDown={() => setDragging('horizontal')}
-        className={`w-[5px] cursor-col-resize flex-shrink-0 transition-colors ${
-          dragging === 'horizontal'
-            ? 'bg-[#007aff] dark:bg-[#0a84ff]'
-            : 'bg-[#c6c6c8]/60 dark:bg-[#38383a] hover:bg-[#8e8e93]/50'
-        }`}
-      />
-
-      <div
-        ref={rightPaneRef}
-        className="flex-shrink-0 flex flex-col h-full min-w-0 bg-[#f2f2f7] dark:bg-black"
-        style={{ width: `${rightWidthPct}%` }}
-      >
-        <div
-          className="min-h-0 p-4 overflow-auto"
-          style={{ height: `${topHeightPct}%` }}
-        >
-          <h3 className="mt-0 mb-1.5 text-[15px] font-semibold tracking-tight">
-            Generated JSON
-          </h3>
-          <div className="text-[12px] text-[#3c3c43]/60 dark:text-[#ebebf5]/60 mb-2.5">
-            Current path: <code className="text-[#007aff] dark:text-[#0a84ff]">{path || '/'}</code>
-          </div>
-          <pre className="m-0 bg-white dark:bg-[#1c1c1e] border border-[#c6c6c8]/60 dark:border-[#38383a] rounded-xl p-3.5 text-[13px] overflow-auto">
-            {JSON.stringify(config, null, 2)}
-          </pre>
+      <div ref={containerRef} className="flex flex-1 min-h-0">
+        <div className="json-by-schema relative flex-1 min-w-0 overflow-auto bg-[#f2f2f7] dark:bg-black">
+          <JsonBySchema
+            key={editorKey}
+            schema={sampleSchema}
+            config={savedConfig}
+            path={path}
+            theme={themePreset}
+            onChange={(nextConfig) => setDraftConfig(nextConfig)}
+            onPathChange={(nextPath) => setPath(nextPath)}
+          />
         </div>
 
         <div
           role="separator"
-          aria-orientation="horizontal"
-          onMouseDown={() => setDragging('vertical')}
-          className={`h-[5px] cursor-row-resize flex-shrink-0 transition-colors ${
-            dragging === 'vertical'
+          aria-orientation="vertical"
+          onMouseDown={() => setDragging('horizontal')}
+          className={`w-[5px] cursor-col-resize flex-shrink-0 transition-colors ${
+            dragging === 'horizontal'
               ? 'bg-[#007aff] dark:bg-[#0a84ff]'
               : 'bg-[#c6c6c8]/60 dark:bg-[#38383a] hover:bg-[#8e8e93]/50'
           }`}
         />
 
-        <div className="flex-1 min-h-0 p-4 pb-16 overflow-auto">
-          <h3 className="mt-0 mb-2.5 text-[15px] font-semibold tracking-tight">
-            JSON Schema
-          </h3>
-          <pre className="m-0 bg-white dark:bg-[#1c1c1e] border border-[#c6c6c8]/60 dark:border-[#38383a] rounded-xl p-3.5 text-[13px] overflow-auto">
-            {JSON.stringify(sampleSchema, null, 2)}
-          </pre>
+        <div
+          ref={rightPaneRef}
+          className="flex-shrink-0 flex flex-col h-full min-w-0 bg-[#f2f2f7] dark:bg-black"
+          style={{ width: `${rightWidthPct}%` }}
+        >
+          <div
+            className="min-h-0 p-4 overflow-auto"
+            style={{ height: `${topHeightPct}%` }}
+          >
+            <h3 className="mt-0 mb-1.5 text-[15px] font-semibold tracking-tight">
+              Generated JSON
+            </h3>
+            <div className="text-[12px] text-[#3c3c43]/60 dark:text-[#ebebf5]/60 mb-2.5">
+              Current path: <code className="text-[#007aff] dark:text-[#0a84ff]">{path || '/'}</code>
+            </div>
+            <pre className="m-0 bg-white dark:bg-[#1c1c1e] border border-[#c6c6c8]/60 dark:border-[#38383a] rounded-xl p-3.5 text-[13px] overflow-auto">
+              {JSON.stringify(draftConfig, null, 2)}
+            </pre>
+          </div>
+
+          <div
+            role="separator"
+            aria-orientation="horizontal"
+            onMouseDown={() => setDragging('vertical')}
+            className={`h-[5px] cursor-row-resize flex-shrink-0 transition-colors ${
+              dragging === 'vertical'
+                ? 'bg-[#007aff] dark:bg-[#0a84ff]'
+                : 'bg-[#c6c6c8]/60 dark:bg-[#38383a] hover:bg-[#8e8e93]/50'
+            }`}
+          />
+
+          <div className="flex-1 min-h-0 p-4 pb-16 overflow-auto">
+            <h3 className="mt-0 mb-2.5 text-[15px] font-semibold tracking-tight">
+              JSON Schema
+            </h3>
+            <pre className="m-0 bg-white dark:bg-[#1c1c1e] border border-[#c6c6c8]/60 dark:border-[#38383a] rounded-xl p-3.5 text-[13px] overflow-auto">
+              {JSON.stringify(sampleSchema, null, 2)}
+            </pre>
+          </div>
         </div>
       </div>
 
-      {/* Floating iOS-style Dark Mode Switch */}
-      <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 px-3.5 py-2 rounded-full backdrop-blur-md bg-white/85 dark:bg-[#1c1c1e]/85 border border-black/10 dark:border-white/15 shadow-lg">
-        <span className="text-[13px] font-medium text-[#3c3c43] dark:text-[#ebebf5]/80 select-none">
-          {darkMode ? 'Dark' : 'Light'}
-        </span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={darkMode}
-          aria-label="Toggle dark mode"
-          onClick={() => setDarkMode((prev) => !prev)}
-          className={`relative inline-flex h-[28px] w-[48px] flex-shrink-0 cursor-pointer rounded-full p-[2px] transition-colors duration-200 ease-in-out focus:outline-none ${
-            darkMode ? 'bg-[#34c759]' : 'bg-[#e9e9ea]'
-          }`}
-        >
-          <span
-            className={`pointer-events-none inline-block h-[24px] w-[24px] transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
-              darkMode ? 'translate-x-[20px]' : 'translate-x-0'
+      {/* Floating Theme Preset & Dark Mode Controls */}
+      <div className="fixed bottom-5 right-5 z-50 flex items-center gap-3 px-3.5 py-2 rounded-full backdrop-blur-md bg-white/85 dark:bg-[#1c1c1e]/85 border border-black/10 dark:border-white/15 shadow-lg">
+        <div className="flex items-center rounded-full bg-[#767680]/15 dark:bg-[#767680]/25 p-0.5">
+          {THEME_PRESETS.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => setThemePreset(preset)}
+              className={`px-2.5 py-1 rounded-full text-[12px] font-medium capitalize transition-colors cursor-pointer ${
+                themePreset === preset
+                  ? 'bg-white dark:bg-[#3a3a3c] text-black dark:text-white shadow-sm'
+                  : 'text-[#3c3c43]/70 dark:text-[#ebebf5]/60 hover:text-black dark:hover:text-white'
+              }`}
+            >
+              {PRESET_LABELS[preset] || preset}
+            </button>
+          ))}
+        </div>
+        <div className="w-px h-5 bg-black/10 dark:bg-white/15" />
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] font-medium text-[#3c3c43] dark:text-[#ebebf5]/80 select-none">
+            {darkMode ? 'Dark' : 'Light'}
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={darkMode}
+            aria-label="Toggle dark mode"
+            onClick={() => setDarkMode((prev) => !prev)}
+            className={`relative inline-flex h-[28px] w-[48px] flex-shrink-0 cursor-pointer rounded-full p-[2px] transition-colors duration-200 ease-in-out focus:outline-none ${
+              darkMode ? 'bg-[#34c759]' : 'bg-[#e9e9ea]'
             }`}
-          />
-        </button>
+          >
+            <span
+              className={`pointer-events-none inline-block h-[24px] w-[24px] transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
+                darkMode ? 'translate-x-[20px]' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
       </div>
     </div>
   );

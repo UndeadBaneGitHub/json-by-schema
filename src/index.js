@@ -41,6 +41,7 @@ function JsonBySchema(props) {
           onPathChange={props.onPathChange}
           customValidators={props.customValidators}
           deltaDepth={props.deltaDepth}
+          theme={props.theme}
         />
       </IntlProvider>
     </Provider>
@@ -55,7 +56,9 @@ JsonBySchema.propTypes = {
   onPathChange: PropTypes.func,
   customValidators: PropTypes.arrayOf(PropTypes.func),
   deltaDepth: PropTypes.number,
+  theme: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };
 
 export { JsonBySchema };
+export { THEME_PRESETS } from './theme';
 export { CustomValidationError, CustomValidationResult } from './customValidation';

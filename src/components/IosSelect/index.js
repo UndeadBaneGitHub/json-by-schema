@@ -92,7 +92,7 @@ function IosSelect({
           setOpen(true);
           if (inputRef.current) inputRef.current.focus();
         }}
-        className="flex items-center justify-between w-full px-3 py-1.5 rounded-[10px] text-[14px] bg-[#767680]/15 dark:bg-[#767680]/25 text-black dark:text-white cursor-text"
+        className="flex items-center justify-between w-full px-3 py-1.5 rounded-[var(--jbs-radius)] text-[14px] bg-[var(--jbs-input-bg)] text-[var(--jbs-text)] cursor-text"
       >
         <input
           ref={inputRef}
@@ -108,7 +108,7 @@ function IosSelect({
             if (!open) setOpen(true);
           }}
           onKeyDown={handleKeyDown}
-          className="w-full bg-transparent outline-none text-[14px] text-black dark:text-white placeholder:text-[#3c3c43]/60 dark:placeholder:text-[#ebebf5]/50"
+          className="w-full bg-transparent outline-none text-[14px] text-[var(--jbs-text)] placeholder:text-[var(--jbs-text-secondary)]"
         />
 
         <div className="flex items-center gap-1 ml-1.5 flex-shrink-0">
@@ -122,7 +122,7 @@ function IosSelect({
                 setOpen(false);
                 if (onChange) onChange(null);
               }}
-              className="p-0.5 text-[#8e8e93] hover:text-black dark:hover:text-white cursor-pointer"
+              className="p-0.5 text-[var(--jbs-text-muted)] hover:text-[var(--jbs-text)] cursor-pointer"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -139,7 +139,7 @@ function IosSelect({
               setOpen((prev) => !prev);
               if (!open && inputRef.current) inputRef.current.focus();
             }}
-            className="p-0.5 text-[#8e8e93] cursor-pointer"
+            className="p-0.5 text-[var(--jbs-text-muted)] cursor-pointer"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="6 9 12 15 18 9" />
@@ -151,10 +151,10 @@ function IosSelect({
       {open && (
         <ul
           role="listbox"
-          className="absolute left-0 right-0 mt-1 z-50 max-h-60 overflow-y-auto p-1 rounded-xl bg-white/95 dark:bg-[#2c2c2e]/95 backdrop-blur-md border border-[#c6c6c8]/60 dark:border-[#38383a] shadow-lg list-none m-0"
+          className="absolute left-0 right-0 mt-1 z-50 max-h-60 overflow-y-auto p-1 rounded-[var(--jbs-radius-lg)] bg-[var(--jbs-popover-bg)] backdrop-blur-md border border-[var(--jbs-border)] shadow-lg list-none m-0"
         >
           {filteredOptions.length === 0 ? (
-            <li className="px-3 py-2 text-[13px] text-[#8e8e93] text-center">
+            <li className="px-3 py-2 text-[13px] text-[var(--jbs-text-muted)] text-center">
               No matching options
             </li>
           ) : (
@@ -171,10 +171,10 @@ function IosSelect({
                     e.preventDefault();
                     selectOption(opt);
                   }}
-                  className={`relative flex items-center px-7 py-2 rounded-lg text-[14px] cursor-pointer select-none ${
+                  className={`relative flex items-center px-7 py-2 rounded-[var(--jbs-radius)] text-[14px] cursor-pointer select-none ${
                     isHighlighted
-                      ? 'bg-[#007aff] dark:bg-[#0a84ff] text-white'
-                      : 'text-black dark:text-white'
+                      ? 'bg-[var(--jbs-accent)] text-[var(--jbs-accent-contrast)]'
+                      : 'text-[var(--jbs-text)]'
                   }`}
                 >
                   {isSelected && (

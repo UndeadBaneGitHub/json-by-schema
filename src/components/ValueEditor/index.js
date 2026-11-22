@@ -153,7 +153,7 @@ function getEditor(props) {
               props.onChange({ target: { value: nextChecked } })
             }
             className={`relative inline-flex h-[28px] w-[48px] flex-shrink-0 cursor-pointer rounded-full p-[2px] transition-colors duration-200 ease-in-out focus:outline-none ${
-              checked ? 'bg-[#34c759]' : 'bg-[#e9e9ea] dark:bg-[#39393d]'
+              checked ? 'bg-[var(--jbs-switch-on)]' : 'bg-[var(--jbs-switch-off)]'
             }`}
           >
             <Switch.Thumb
@@ -162,7 +162,7 @@ function getEditor(props) {
               }`}
             />
           </Switch.Root>
-          <span className="text-[14px] font-medium text-black dark:text-white">
+          <span className="text-[14px] font-medium text-[var(--jbs-text)]">
             {checked ? 'True' : 'False'}
           </span>
         </div>
@@ -206,15 +206,15 @@ function getEditor(props) {
                 }
                 className="relative flex items-center select-none touch-none w-full h-5 cursor-pointer"
               >
-                <Slider.Track className="bg-[#767680]/20 dark:bg-[#767680]/35 relative grow rounded-full h-[4px]">
-                  <Slider.Range className="absolute bg-[#007aff] dark:bg-[#0a84ff] rounded-full h-full" />
+                <Slider.Track className="bg-[var(--jbs-input-bg)] relative grow rounded-full h-[4px]">
+                  <Slider.Range className="absolute bg-[var(--jbs-accent)] rounded-full h-full" />
                 </Slider.Track>
                 <Slider.Thumb
                   aria-label="Numeric value slider"
-                  className="block w-5 h-5 bg-white border border-black/10 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-[#007aff]/40"
+                  className="block w-5 h-5 bg-white border border-black/10 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--jbs-accent)]/40"
                 />
               </Slider.Root>
-              <div className="flex justify-between text-[11px] text-[#3c3c43]/60 dark:text-[#ebebf5]/50">
+              <div className="flex justify-between text-[11px] text-[var(--jbs-text-secondary)]">
                 <span>{props.minimum}</span>
                 <span>{props.maximum}</span>
               </div>
@@ -226,8 +226,8 @@ function getEditor(props) {
     case 'null': {
       const isNull = props.value === null;
       return (
-        <div className="flex items-center justify-between px-3 py-2.5 rounded-[10px] bg-[#767680]/15 dark:bg-[#767680]/25">
-          <span className="text-[14px] font-mono text-black dark:text-white">
+        <div className="flex items-center justify-between px-3 py-2.5 rounded-[var(--jbs-radius)] bg-[var(--jbs-input-bg)]">
+          <span className="text-[14px] font-mono text-[var(--jbs-text)]">
             {isNull ? 'null' : String(props.value)}
           </span>
           <button
@@ -236,10 +236,10 @@ function getEditor(props) {
             onClick={() =>
               props.onChange({ target: { value: null, strValue: 'null' } })
             }
-            className={`px-3 py-1 rounded-lg text-[13px] font-medium transition-opacity ${
+            className={`px-3 py-1 rounded-[var(--jbs-radius)] text-[13px] font-medium transition-opacity ${
               isNull
-                ? 'bg-[#8e8e93]/20 text-[#8e8e93] cursor-not-allowed'
-                : 'bg-[#007aff] dark:bg-[#0a84ff] text-white cursor-pointer hover:opacity-90'
+                ? 'bg-[var(--jbs-input-bg)] text-[var(--jbs-text-muted)] cursor-not-allowed'
+                : 'bg-[var(--jbs-accent)] text-[var(--jbs-accent-contrast)] cursor-pointer hover:opacity-90'
             }`}
           >
             Set to null
@@ -277,7 +277,7 @@ getEditor.propTypes = {
 
 function ValueEditor(props) {
   return (
-    <Form onSubmit={props.onSubmit} onKeyDown={props.onKeyDown}>
+    <Form onSubmit={(e) => e.preventDefault()} onKeyDown={props.onKeyDown}>
       <EditorWrapper>{getEditor(props)}</EditorWrapper>
       <div>
         <Button
@@ -288,13 +288,6 @@ function ValueEditor(props) {
           className={'text-button'}
           onClick={props.onRevert}
         />
-        <Button
-          type="submit"
-          disabled={props.disableButtons.submit}
-          value={props.intl.formatMessage(messages.save)}
-          style={{ float: 'right', paddingRight: 0 }}
-          className={'text-button'}
-        />
       </div>
     </Form>
   );
@@ -303,7 +296,6 @@ function ValueEditor(props) {
 ValueEditor.propTypes = {
   disableButtons: PropTypes.object.isRequired,
   intl: PropTypes.object.isRequired,
-  onSubmit: PropTypes.func.isRequired,
   onRevert: PropTypes.func.isRequired,
   onKeyDown: PropTypes.func.isRequired,
 };
