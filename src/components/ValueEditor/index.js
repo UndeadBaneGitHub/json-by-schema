@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 
@@ -79,37 +79,61 @@ getSelect.propTypes = {
   onKeyDown: PropTypes.func.isRequired,
 };
 
+function JsonAceEditor({ strValue, onChange }) {
+  const [isDark, setIsDark] = useState(
+    () =>
+      typeof document !== 'undefined' &&
+      document.documentElement.classList.contains('dark'),
+  );
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined;
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <AceEditor
+      mode="json"
+      theme={isDark ? 'tomorrow_night' : 'github'}
+      name="json-property-editor"
+      onChange={onJsonEditorChange(onChange)}
+      fontSize={14}
+      showPrintMargin
+      showGutter
+      highlightActiveLine
+      value={strValue}
+      setOptions={{
+        showLineNumbers: true,
+        tabSize: 2,
+      }}
+      minLines={25}
+      maxLines={120}
+      wrapEnabled
+      style={{
+        width: '100%',
+        borderRadius: '10px',
+        backgroundColor: isDark ? '#1d1f21' : '#f2f2f7',
+      }}
+      editorProps={{ $blockScrolling: true }}
+    />
+  );
+}
+
+JsonAceEditor.propTypes = {
+  strValue: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+};
+
 function getEditor(props) {
   if (props.jsonEditor) {
-    const isDark =
-      typeof document !== 'undefined' &&
-      document.documentElement.classList.contains('dark');
-    return (
-      <AceEditor
-        mode="json"
-        theme={isDark ? 'tomorrow_night' : 'github'}
-        name="json-property-editor"
-        onChange={onJsonEditorChange(props.onChange)}
-        fontSize={16}
-        showPrintMargin
-        showGutter
-        highlightActiveLine
-        value={props.strValue}
-        setOptions={{
-          showLineNumbers: true,
-          tabSize: 2,
-        }}
-        minLines={25}
-        maxLines={120}
-        wrapEnabled
-        style={{
-          width: '100%',
-          borderRadius: '6px',
-          backgroundColor: '#dddce1',
-        }}
-        editorProps={{ $blockScrolling: true }}
-      />
-    );
+    return <JsonAceEditor strValue={props.strValue} onChange={props.onChange} />;
   }
   if (props.enum) {
     const options = props.enum.map((value) => ({
