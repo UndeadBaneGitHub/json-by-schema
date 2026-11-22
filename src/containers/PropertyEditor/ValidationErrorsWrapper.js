@@ -2,7 +2,7 @@ import React from 'react';
 
 const ValidationErrorsWrapper = ({ className = '', ...rest }) => (
   <div
-    className={`text-[rgba(235,0,0,0.8)] font-bold max-h-[20%] overflow-y-auto mb-[1em] ${className}`}
+    className={`text-[#ff3b30] dark:text-[#ff453a] font-semibold text-[13px] max-h-[20%] overflow-y-auto mb-4 ${className}`}
     {...rest}
   />
 );

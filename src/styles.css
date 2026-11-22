@@ -2,20 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --jbs-bg: #ffffff;
+  --jbs-bg-secondary: #f2f2f7;
+  --jbs-bg-tertiary: #e5e5ea;
+  --jbs-input-bg: rgba(118, 118, 128, 0.12);
+  --jbs-text: #000000;
+  --jbs-text-secondary: rgba(60, 60, 67, 0.6);
+  --jbs-border: rgba(60, 60, 67, 0.14);
+  --jbs-accent: #007aff;
+  --jbs-danger: #ff3b30;
+  --jbs-scroll-track: rgba(0, 0, 0, 0.04);
+  --jbs-scroll-thumb: rgba(0, 0, 0, 0.2);
+}
+
+.dark {
+  --jbs-bg: #1c1c1e;
+  --jbs-bg-secondary: #2c2c2e;
+  --jbs-bg-tertiary: #3a3a3c;
+  --jbs-input-bg: rgba(118, 118, 128, 0.24);
+  --jbs-text: #ffffff;
+  --jbs-text-secondary: rgba(235, 235, 245, 0.6);
+  --jbs-border: rgba(84, 84, 88, 0.65);
+  --jbs-accent: #0a84ff;
+  --jbs-danger: #ff453a;
+  --jbs-scroll-track: rgba(255, 255, 255, 0.04);
+  --jbs-scroll-thumb: rgba(255, 255, 255, 0.22);
+}
+
 .json-by-schema {
   height: 100%;
   width: 100%;
-  font-family: 'Helvetica Neue', Helvetica, 'Open Sans', Arial, sans-serif;
-}
-
-.json-by-schema.fontLoaded {
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--jbs-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 .json-by-schema p,
 .json-by-schema label {
-  font-family: Georgia, Times, 'Times New Roman', serif;
-  line-height: 1.5em;
+  font-family: inherit;
+  line-height: 1.45em;
 }
 
 .json-by-schema .clearfix::before,
@@ -30,10 +56,11 @@
 
 .json-by-schema .text-button {
   padding: 0.6em 0.8em;
-  color: #2b7ccd;
-  font-size: 1.15em;
+  color: var(--jbs-accent);
+  font-size: 1em;
+  font-weight: 500;
   outline: none;
-  font-family: Helvetica, 'Helvetica Neue', 'Open Sans', Arial, sans-serif;
+  font-family: inherit;
 }
 
 .json-by-schema .text-button:focus {
@@ -43,19 +70,20 @@
 .json-by-schema input,
 .json-by-schema textarea,
 .json-by-schema select {
-  font-family: Helvetica, 'Helvetica Neue', 'Open Sans', Arial, sans-serif;
+  font-family: inherit;
 }
 
 .json-by-schema .scroll-style::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 .json-by-schema .scroll-style::-webkit-scrollbar-track {
-  background: #eee;
+  background: var(--jbs-scroll-track);
 }
 
 .json-by-schema .scroll-style::-webkit-scrollbar-thumb {
-  background: #aaa;
+  background: var(--jbs-scroll-thumb);
+  border-radius: 4px;
 }
 
 .json-by-schema .hyphenate {
@@ -74,7 +102,8 @@
 }
 
 .json-by-schema .property-being-dragged {
-  border: 2px solid #eee;
+  border: 1px solid var(--jbs-accent);
+  border-radius: 8px;
   z-index: 50;
 }
 
@@ -95,7 +124,7 @@
   margin: 0 auto;
   width: 15%;
   height: 15%;
-  background-color: #999;
+  background-color: var(--jbs-text-secondary);
   border-radius: 100%;
   animation: jbs-circle-fade-delay 1.2s infinite ease-in-out both;
   animation-delay: var(--jbs-delay, 0s);

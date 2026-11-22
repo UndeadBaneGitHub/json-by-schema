@@ -10,6 +10,7 @@ import { injectIntl } from 'react-intl';
 
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-github';
+import 'ace-builds/src-noconflict/theme-tomorrow_night';
 import 'ace-builds/src-noconflict/mode-json';
 
 import Select from 'react-select';
@@ -67,9 +68,35 @@ function getSelect(props, options) {
           ...base,
           cursor: 'pointer',
           width: '100%',
-          backgroundColor: '#dddce1',
-          borderRadius: '0.5em',
-          color: 'black',
+          backgroundColor: 'var(--jbs-input-bg)',
+          borderColor: 'transparent',
+          borderRadius: '10px',
+          boxShadow: 'none',
+        }),
+        menu: (base) => ({
+          ...base,
+          backgroundColor: 'var(--jbs-bg)',
+          border: '1px solid var(--jbs-border)',
+          borderRadius: '10px',
+          overflow: 'hidden',
+        }),
+        option: (base, state) => ({
+          ...base,
+          backgroundColor: state.isSelected
+            ? 'var(--jbs-accent)'
+            : state.isFocused
+              ? 'var(--jbs-bg-secondary)'
+              : 'transparent',
+          color: state.isSelected ? '#ffffff' : 'var(--jbs-text)',
+          cursor: 'pointer',
+        }),
+        singleValue: (base) => ({
+          ...base,
+          color: 'var(--jbs-text)',
+        }),
+        input: (base) => ({
+          ...base,
+          color: 'var(--jbs-text)',
         }),
       }}
       onKeyDown={props.onKeyDown}
@@ -91,10 +118,13 @@ getSelect.propTypes = {
 
 function getEditor(props) {
   if (props.jsonEditor) {
+    const isDark =
+      typeof document !== 'undefined' &&
+      document.documentElement.classList.contains('dark');
     return (
       <AceEditor
         mode="json"
-        theme="github"
+        theme={isDark ? 'tomorrow_night' : 'github'}
         name="json-property-editor"
         onChange={onJsonEditorChange(props.onChange)}
         fontSize={16}

@@ -59,7 +59,40 @@ function SchemaSelector(props) {
           options={options}
           placeholder={props.intl.formatMessage(messages.unselectedMessage)}
           isClearable
-          styles={{ menu: (base) => ({ ...base, zIndex: 15 }) }}
+          styles={{
+            control: (base) => ({
+              ...base,
+              backgroundColor: 'var(--jbs-bg)',
+              borderColor: 'var(--jbs-border)',
+              borderRadius: '10px',
+              boxShadow: 'none',
+            }),
+            menu: (base) => ({
+              ...base,
+              zIndex: 15,
+              backgroundColor: 'var(--jbs-bg)',
+              border: '1px solid var(--jbs-border)',
+              borderRadius: '10px',
+              overflow: 'hidden',
+            }),
+            option: (base, state) => ({
+              ...base,
+              backgroundColor: state.isSelected
+                ? 'var(--jbs-accent)'
+                : state.isFocused
+                  ? 'var(--jbs-bg-secondary)'
+                  : 'transparent',
+              color: state.isSelected ? '#ffffff' : 'var(--jbs-text)',
+            }),
+            singleValue: (base) => ({
+              ...base,
+              color: 'var(--jbs-text)',
+            }),
+            input: (base) => ({
+              ...base,
+              color: 'var(--jbs-text)',
+            }),
+          }}
           autoFocus
         />
       </SelectorWrapper>

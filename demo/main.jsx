@@ -66,25 +66,25 @@ const initialConfig = {
   },
 };
 
-const preStyle = {
-  background: '#fff',
-  border: '1px solid #e1e4e8',
-  borderRadius: '6px',
-  padding: '12px',
-  fontSize: '13px',
-  overflow: 'auto',
-  margin: 0,
-};
-
 function DemoApp() {
   const [config, setConfig] = useState(initialConfig);
   const [path, setPath] = useState('');
   const [rightWidthPct, setRightWidthPct] = useState(33.33);
   const [topHeightPct, setTopHeightPct] = useState(50);
   const [dragging, setDragging] = useState(null); // 'horizontal' | 'vertical' | null
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('jbs-dark-mode');
+    if (saved !== null) return saved === 'true';
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
 
   const containerRef = useRef(null);
   const rightPaneRef = useRef(null);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('jbs-dark-mode', String(darkMode));
+  }, [darkMode]);
 
   useEffect(() => {
     if (!dragging) return undefined;
@@ -116,22 +116,10 @@ function DemoApp() {
   return (
     <div
       ref={containerRef}
-      style={{
-        display: 'flex',
-        height: '100vh',
-        fontFamily: 'system-ui, sans-serif',
-        userSelect: dragging ? 'none' : 'auto',
-      }}
+      className={`flex h-screen bg-[#f2f2f7] dark:bg-black text-black dark:text-white ${dragging ? 'select-none' : ''}`}
+      style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif' }}
     >
-      <div
-        className="json-by-schema"
-        style={{
-          position: 'relative',
-          flex: 1,
-          minWidth: 0,
-          overflow: 'auto',
-        }}
-      >
+      <div className="json-by-schema relative flex-1 min-w-0 overflow-auto bg-[#f2f2f7] dark:bg-black">
         <JsonBySchema
           schema={sampleSchema}
           config={config}
@@ -145,39 +133,29 @@ function DemoApp() {
         role="separator"
         aria-orientation="vertical"
         onMouseDown={() => setDragging('horizontal')}
-        style={{
-          width: '6px',
-          cursor: 'col-resize',
-          background: dragging === 'horizontal' ? '#c5cbd3' : '#e1e4e8',
-          flexShrink: 0,
-        }}
+        className={`w-[5px] cursor-col-resize flex-shrink-0 transition-colors ${
+          dragging === 'horizontal'
+            ? 'bg-[#007aff] dark:bg-[#0a84ff]'
+            : 'bg-[#c6c6c8]/60 dark:bg-[#38383a] hover:bg-[#8e8e93]/50'
+        }`}
       />
 
       <div
         ref={rightPaneRef}
-        style={{
-          width: `${rightWidthPct}%`,
-          flexShrink: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          background: '#f8f9fa',
-          minWidth: 0,
-        }}
+        className="flex-shrink-0 flex flex-col h-full min-w-0 bg-[#f2f2f7] dark:bg-black"
+        style={{ width: `${rightWidthPct}%` }}
       >
         <div
-          style={{
-            height: `${topHeightPct}%`,
-            minHeight: 0,
-            padding: '16px',
-            overflow: 'auto',
-          }}
+          className="min-h-0 p-4 overflow-auto"
+          style={{ height: `${topHeightPct}%` }}
         >
-          <h3 style={{ marginTop: 0, marginBottom: '8px' }}>Generated JSON</h3>
-          <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
-            Current path: <code>{path || '/'}</code>
+          <h3 className="mt-0 mb-1.5 text-[15px] font-semibold tracking-tight">
+            Generated JSON
+          </h3>
+          <div className="text-[12px] text-[#3c3c43]/60 dark:text-[#ebebf5]/60 mb-2.5">
+            Current path: <code className="text-[#007aff] dark:text-[#0a84ff]">{path || '/'}</code>
           </div>
-          <pre style={preStyle}>
+          <pre className="m-0 bg-white dark:bg-[#1c1c1e] border border-[#c6c6c8]/60 dark:border-[#38383a] rounded-xl p-3.5 text-[13px] overflow-auto">
             {JSON.stringify(config, null, 2)}
           </pre>
         </div>
@@ -186,27 +164,44 @@ function DemoApp() {
           role="separator"
           aria-orientation="horizontal"
           onMouseDown={() => setDragging('vertical')}
-          style={{
-            height: '6px',
-            cursor: 'row-resize',
-            background: dragging === 'vertical' ? '#c5cbd3' : '#e1e4e8',
-            flexShrink: 0,
-          }}
+          className={`h-[5px] cursor-row-resize flex-shrink-0 transition-colors ${
+            dragging === 'vertical'
+              ? 'bg-[#007aff] dark:bg-[#0a84ff]'
+              : 'bg-[#c6c6c8]/60 dark:bg-[#38383a] hover:bg-[#8e8e93]/50'
+          }`}
         />
 
-        <div
-          style={{
-            flex: 1,
-            minHeight: 0,
-            padding: '16px',
-            overflow: 'auto',
-          }}
-        >
-          <h3 style={{ marginTop: 0, marginBottom: '8px' }}>JSON Schema</h3>
-          <pre style={preStyle}>
+        <div className="flex-1 min-h-0 p-4 pb-16 overflow-auto">
+          <h3 className="mt-0 mb-2.5 text-[15px] font-semibold tracking-tight">
+            JSON Schema
+          </h3>
+          <pre className="m-0 bg-white dark:bg-[#1c1c1e] border border-[#c6c6c8]/60 dark:border-[#38383a] rounded-xl p-3.5 text-[13px] overflow-auto">
             {JSON.stringify(sampleSchema, null, 2)}
           </pre>
         </div>
+      </div>
+
+      {/* Floating iOS-style Dark Mode Switch */}
+      <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 px-3.5 py-2 rounded-full backdrop-blur-md bg-white/85 dark:bg-[#1c1c1e]/85 border border-black/10 dark:border-white/15 shadow-lg">
+        <span className="text-[13px] font-medium text-[#3c3c43] dark:text-[#ebebf5]/80 select-none">
+          {darkMode ? 'Dark' : 'Light'}
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={darkMode}
+          aria-label="Toggle dark mode"
+          onClick={() => setDarkMode((prev) => !prev)}
+          className={`relative inline-flex h-[28px] w-[48px] flex-shrink-0 cursor-pointer rounded-full p-[2px] transition-colors duration-200 ease-in-out focus:outline-none ${
+            darkMode ? 'bg-[#34c759]' : 'bg-[#e9e9ea]'
+          }`}
+        >
+          <span
+            className={`pointer-events-none inline-block h-[24px] w-[24px] transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
+              darkMode ? 'translate-x-[20px]' : 'translate-x-0'
+            }`}
+          />
+        </button>
       </div>
     </div>
   );
