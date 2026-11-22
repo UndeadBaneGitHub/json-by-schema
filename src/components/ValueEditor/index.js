@@ -16,6 +16,7 @@ import 'ace-builds/src-noconflict/mode-json';
 import * as Switch from '@radix-ui/react-switch';
 import * as Slider from '@radix-ui/react-slider';
 import IosSelect from '../IosSelect';
+import { isValueTypeMatch } from '../../utils/schemaUtils';
 
 import messages from './messages';
 import Form from './Form';
@@ -146,7 +147,46 @@ JsonAceEditor.propTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
+function SetToNullButton({ isNull, onSetNull, className = '' }) {
+  return (
+    <button
+      type="button"
+      disabled={isNull}
+      onClick={onSetNull}
+      className={`px-2.5 py-1 rounded-[var(--jbs-radius)] text-[12px] font-medium transition-opacity flex-shrink-0 ${
+        isNull
+          ? 'bg-[var(--jbs-input-bg)] text-[var(--jbs-text-muted)] cursor-not-allowed'
+          : 'bg-[var(--jbs-accent)] text-[var(--jbs-accent-contrast)] cursor-pointer hover:opacity-90'
+      } ${className}`}
+    >
+      Set to null
+    </button>
+  );
+}
+
+SetToNullButton.propTypes = {
+  isNull: PropTypes.bool.isRequired,
+  onSetNull: PropTypes.func.isRequired,
+  className: PropTypes.string,
+};
+
 function getEditor(props) {
+  const handleSetNull = () =>
+    props.onChange({ target: { value: null, strValue: '' } });
+  const isNull = props.value === null;
+  const isMismatchedType =
+    !isNull &&
+    props.value !== undefined &&
+    typeof props.type === 'string' &&
+    !isValueTypeMatch(props.value, props.type);
+  const placeholderValue = isNull
+    ? 'null'
+    : isMismatchedType
+      ? typeof props.value === 'object'
+        ? JSON.stringify(props.value)
+        : String(props.value)
+      : undefined;
+
   if (props.jsonEditor) {
     return <JsonAceEditor strValue={props.strValue} onChange={props.onChange} />;
   }
@@ -155,31 +195,46 @@ function getEditor(props) {
       value,
       label: value,
     }));
+    if (props.allowsNull) {
+      return (
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">{getSelect(props, options)}</div>
+          <SetToNullButton isNull={isNull} onSetNull={handleSetNull} />
+        </div>
+      );
+    }
     return getSelect(props, options);
   }
   switch (props.type) {
     case 'boolean': {
       const checked = Boolean(props.value);
       return (
-        <div className="flex items-center gap-3 py-1">
-          <Switch.Root
-            checked={checked}
-            onCheckedChange={(nextChecked) =>
-              props.onChange({ target: { value: nextChecked } })
-            }
-            className={`relative inline-flex h-[28px] w-[48px] flex-shrink-0 cursor-pointer rounded-full p-[2px] transition-colors duration-200 ease-in-out focus:outline-none ${
-              checked ? 'bg-[var(--jbs-switch-on)]' : 'bg-[var(--jbs-switch-off)]'
-            }`}
-          >
-            <Switch.Thumb
-              className={`pointer-events-none inline-block h-[24px] w-[24px] transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
-                checked ? 'translate-x-[20px]' : 'translate-x-0'
+        <div className="flex items-center justify-between py-1">
+          <div className="flex items-center gap-3">
+            <Switch.Root
+              checked={checked && !isNull && !isMismatchedType}
+              onCheckedChange={(nextChecked) =>
+                props.onChange({ target: { value: nextChecked } })
+              }
+              className={`relative inline-flex h-[28px] w-[48px] flex-shrink-0 cursor-pointer rounded-full p-[2px] transition-colors duration-200 ease-in-out focus:outline-none ${
+                checked && !isNull && !isMismatchedType
+                  ? 'bg-[var(--jbs-switch-on)]'
+                  : 'bg-[var(--jbs-switch-off)]'
               }`}
-            />
-          </Switch.Root>
-          <span className="text-[14px] font-medium text-[var(--jbs-text)]">
-            {checked ? 'True' : 'False'}
-          </span>
+            >
+              <Switch.Thumb
+                className={`pointer-events-none inline-block h-[24px] w-[24px] transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out ${
+                  checked && !isNull && !isMismatchedType ? 'translate-x-[20px]' : 'translate-x-0'
+                }`}
+              />
+            </Switch.Root>
+            <span className="text-[14px] font-medium text-[var(--jbs-text)]">
+              {isNull ? 'null' : isMismatchedType ? placeholderValue : checked ? 'True' : 'False'}
+            </span>
+          </div>
+          {props.allowsNull && (
+            <SetToNullButton isNull={isNull} onSetNull={handleSetNull} />
+          )}
         </div>
       );
     }
@@ -201,12 +256,29 @@ function getEditor(props) {
 
       return (
         <div className="flex flex-col gap-3">
-          <Input
-            type={'number'}
-            value={props.strValue !== undefined ? props.strValue : (props.value ?? '')}
-            onChange={props.onChange}
-            step={isInteger ? 1 : 'any'}
-          />
+          <div className="relative flex items-center">
+            <Input
+              type={'number'}
+              placeholder={placeholderValue}
+              value={
+                isNull || isMismatchedType
+                  ? ''
+                  : props.strValue !== undefined
+                    ? props.strValue
+                    : (props.value ?? '')
+              }
+              onChange={props.onChange}
+              step={isInteger ? 1 : 'any'}
+              className={props.allowsNull ? 'pr-[96px]' : ''}
+            />
+            {props.allowsNull && (
+              <SetToNullButton
+                isNull={isNull}
+                onSetNull={handleSetNull}
+                className="absolute right-1.5"
+              />
+            )}
+          </div>
           {hasRange && (
             <div className="flex flex-col gap-1.5 px-1">
               <Slider.Root
@@ -239,37 +311,38 @@ function getEditor(props) {
       );
     }
     case 'null': {
-      const isNull = props.value === null;
       return (
         <div className="flex items-center justify-between px-3 py-2.5 rounded-[var(--jbs-radius)] bg-[var(--jbs-input-bg)]">
           <span className="text-[14px] font-mono text-[var(--jbs-text)]">
             {isNull ? 'null' : String(props.value)}
           </span>
-          <button
-            type="button"
-            disabled={isNull}
-            onClick={() =>
+          <SetToNullButton
+            isNull={isNull}
+            onSetNull={() =>
               props.onChange({ target: { value: null, strValue: 'null' } })
             }
-            className={`px-3 py-1 rounded-[var(--jbs-radius)] text-[13px] font-medium transition-opacity ${
-              isNull
-                ? 'bg-[var(--jbs-input-bg)] text-[var(--jbs-text-muted)] cursor-not-allowed'
-                : 'bg-[var(--jbs-accent)] text-[var(--jbs-accent-contrast)] cursor-pointer hover:opacity-90'
-            }`}
-          >
-            Set to null
-          </button>
+          />
         </div>
       );
     }
     default: {
       return (
-        <TextArea
-          className={'scroll-style'}
-          value={props.value ?? ''}
-          onChange={props.onChange}
-          rows="10"
-        />
+        <div className="relative">
+          <TextArea
+            className={`scroll-style ${props.allowsNull ? 'pb-10' : ''}`}
+            placeholder={placeholderValue}
+            value={isNull || isMismatchedType ? '' : (props.value ?? '')}
+            onChange={props.onChange}
+            rows="10"
+          />
+          {props.allowsNull && (
+            <SetToNullButton
+              isNull={isNull}
+              onSetNull={handleSetNull}
+              className="absolute bottom-2.5 right-2.5"
+            />
+          )}
+        </div>
       );
     }
   }
@@ -286,13 +359,14 @@ getEditor.propTypes = {
   strValue: PropTypes.string,
   enum: PropTypes.array,
   type: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
+  allowsNull: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   jsonEditor: PropTypes.bool,
 };
 
 function ValueEditor(props) {
   return (
-    <Form onSubmit={(e) => e.preventDefault()} onKeyDown={props.onKeyDown}>
+    <Form onSubmit={props.onSubmit} onKeyDown={props.onKeyDown}>
       <EditorWrapper>{getEditor(props)}</EditorWrapper>
       <div>
         <Button
@@ -303,6 +377,13 @@ function ValueEditor(props) {
           className={'text-button'}
           onClick={props.onRevert}
         />
+        <Button
+          type="submit"
+          disabled={props.disableButtons.submit}
+          value={props.intl.formatMessage(messages.save)}
+          style={{ float: 'right', paddingRight: 0 }}
+          className={'text-button'}
+        />
       </div>
     </Form>
   );
@@ -311,8 +392,13 @@ function ValueEditor(props) {
 ValueEditor.propTypes = {
   disableButtons: PropTypes.object.isRequired,
   intl: PropTypes.object.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   onRevert: PropTypes.func.isRequired,
   onKeyDown: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
+  allowsNull: PropTypes.bool,
+  type: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
+  value: PropTypes.any,
 };
 
 export default injectIntl(ValueEditor);

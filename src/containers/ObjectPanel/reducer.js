@@ -4,7 +4,7 @@
  *
  */
 
-import { fromJS } from 'immutable';
+import { fromJS, Map } from 'immutable';
 
 import { assurePath } from '../../utils/schemaUtils';
 
@@ -59,8 +59,11 @@ function objectPanelReducer(state = initialState, action) {
     }
     case SELECT_SCHEMA: {
       const { schemaIndexes } = action;
+      const baseState = Map.isMap(state.get(path))
+        ? state
+        : state.set(path, initialPanelState);
 
-      return state.setIn([path, 'schemaIndexes'], schemaIndexes);
+      return baseState.setIn([path, 'schemaIndexes'], schemaIndexes);
     }
     case RESET_OPEN_PROPERTY: {
       const openProperty = state.getIn([path, 'openProperty']);
@@ -68,8 +71,8 @@ function objectPanelReducer(state = initialState, action) {
       let localState = state;
 
       if (openProperty) {
-        // close respective panel
-        localState = localState.set(assurePath(openProperty.path), false);
+        // close respective panel without leaving a non-Map value behind
+        localState = localState.delete(assurePath(openProperty.path));
       }
 
       return localState.setIn([path, 'openProperty'], false);

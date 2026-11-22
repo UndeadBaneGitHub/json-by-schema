@@ -108,10 +108,9 @@ export class NewPatternPropertyItem extends React.PureComponent {
       );
 
       const newPropPath = genPath(newName, path);
-      onSubmit(newValueConfig, newPropPath);
-      onChange('', Object.keys(schema.patternProperties), path);
       onCancel(path);
-
+      onChange('', Object.keys(schema.patternProperties), path);
+      onSubmit(newValueConfig, newPropPath);
       this.props.updatePath(newPropPath);
     };
   }

@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
+import AceEditor from 'react-ace';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/theme-github';
+import 'ace-builds/src-noconflict/theme-tomorrow_night';
 import { JsonBySchema, THEME_PRESETS } from '../src';
 
 const sampleSchema = {
@@ -38,6 +42,10 @@ const sampleSchema = {
     nullableMarker: {
       type: 'null',
       description: 'Null type field',
+    },
+    flexibleValue: {
+      type: ['string', 'number', 'null'],
+      description: 'Multi-type field (type as array)',
     },
     tags: {
       type: 'array',
@@ -158,6 +166,7 @@ const initialConfig = {
   environment: 'development',
   enabled: true,
   nullableMarker: null,
+  flexibleValue: 'hello',
   tags: ['api', 'v1'],
   scores: [0.95, 1.5],
   endpoints: [
@@ -192,59 +201,12 @@ const PRESET_LABELS = {
   swagger: 'Swagger',
 };
 
-const JSON_TOKEN_REGEX =
-  /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g;
-
-function HighlightedJson({ data }) {
-  const text = JSON.stringify(data, null, 2) || '';
-  const parts = [];
-  let lastIndex = 0;
-  let match;
-
-  JSON_TOKEN_REGEX.lastIndex = 0;
-  while ((match = JSON_TOKEN_REGEX.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(
-        <span key={`p-${lastIndex}`} className="text-[#6e7781] dark:text-[#8b949e]">
-          {text.slice(lastIndex, match.index)}
-        </span>,
-      );
-    }
-
-    const token = match[0];
-    let cls = 'text-[#0550ae] dark:text-[#79c0ff]'; // number
-    if (token.startsWith('"')) {
-      if (token.endsWith(':')) {
-        cls = 'text-[#0550ae] dark:text-[#79c0ff]'; // key
-      } else {
-        cls = 'text-[#116329] dark:text-[#a5d6ff]'; // string
-      }
-    } else if (/true|false/.test(token)) {
-      cls = 'text-[#8250df] dark:text-[#d2a8ff]'; // boolean
-    } else if (token === 'null') {
-      cls = 'text-[#cf222e] dark:text-[#ff7b72]'; // null
-    }
-
-    parts.push(
-      <span key={`t-${match.index}`} className={cls}>
-        {token}
-      </span>,
-    );
-    lastIndex = JSON_TOKEN_REGEX.lastIndex;
-  }
-
-  if (lastIndex < text.length) {
-    parts.push(
-      <span key={`p-${lastIndex}`} className="text-[#6e7781] dark:text-[#8b949e]">
-        {text.slice(lastIndex)}
-      </span>,
-    );
-  }
-
-  return <>{parts}</>;
-}
-
 function DemoApp() {
+  const [activeSchema, setActiveSchema] = useState(sampleSchema);
+  const [schemaText, setSchemaText] = useState(() =>
+    JSON.stringify(sampleSchema, null, 2),
+  );
+  const [schemaError, setSchemaError] = useState(null);
   const [savedConfig, setSavedConfig] = useState(initialConfig);
   const [draftConfig, setDraftConfig] = useState(initialConfig);
   const [editorKey, setEditorKey] = useState(0);
@@ -276,15 +238,67 @@ function DemoApp() {
     }
   };
 
+  const isSchemaDirty = schemaText !== JSON.stringify(activeSchema, null, 2);
+
+  const handleSchemaTextChange = (nextText) => {
+    setSchemaText(nextText);
+    try {
+      const parsed = JSON.parse(nextText);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        setSchemaError('Schema must be a JSON object');
+      } else {
+        setSchemaError(null);
+      }
+    } catch (err) {
+      setSchemaError(err.message);
+    }
+  };
+
+  const handleUpdateSchema = () => {
+    try {
+      const parsed = JSON.parse(schemaText);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        setSchemaError('Schema must be a JSON object');
+        return;
+      }
+      setSchemaError(null);
+      setActiveSchema(parsed);
+      setSchemaText(JSON.stringify(parsed, null, 2));
+      runWithLoadingOverlay(() => {
+        setSavedConfig(draftConfig);
+        setPath('');
+        setEditorKey((k) => k + 1);
+      });
+    } catch (err) {
+      setSchemaError(err.message);
+    }
+  };
+
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const runWithLoadingOverlay = (fn) => {
+    setIsUpdating(true);
+    window.requestAnimationFrame(() => {
+      fn();
+      setTimeout(() => {
+        setIsUpdating(false);
+      }, 200);
+    });
+  };
+
   const hasChanges = JSON.stringify(draftConfig) !== JSON.stringify(savedConfig);
 
   const handleGlobalSave = () => {
-    setSavedConfig(draftConfig);
+    runWithLoadingOverlay(() => {
+      setSavedConfig(draftConfig);
+    });
   };
 
   const handleGlobalRevert = () => {
-    setDraftConfig(savedConfig);
-    setEditorKey((k) => k + 1);
+    runWithLoadingOverlay(() => {
+      setDraftConfig(savedConfig);
+      setEditorKey((k) => k + 1);
+    });
   };
 
   const containerRef = useRef(null);
@@ -437,7 +451,7 @@ function DemoApp() {
         <div className="json-by-schema relative flex-1 min-w-0 overflow-auto bg-[#f2f2f7] dark:bg-black">
           <JsonBySchema
             key={editorKey}
-            schema={sampleSchema}
+            schema={activeSchema}
             config={savedConfig}
             path={path}
             theme={themePreset}
@@ -473,14 +487,30 @@ function DemoApp() {
             <div className="text-[12px] text-[#3c3c43]/60 dark:text-[#ebebf5]/60 mb-2.5 flex-shrink-0">
               Current path: <code className="text-[#007aff] dark:text-[#0a84ff]">{path || '/'}</code>
             </div>
-            <div className="relative flex-1 min-h-0">
-              <pre className="m-0 h-full bg-white dark:bg-[#1c1c1e] border border-[#c6c6c8]/60 dark:border-[#38383a] rounded-xl p-3.5 pb-12 text-[13px] overflow-auto">
-                <HighlightedJson data={draftConfig} />
-              </pre>
+            <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden border border-[#c6c6c8]/60 dark:border-[#38383a] bg-white dark:bg-[#1d1f21]">
+              <AceEditor
+                mode="json"
+                theme={darkMode ? 'tomorrow_night' : 'github'}
+                name="demo-output-json"
+                value={JSON.stringify(draftConfig, null, 2)}
+                readOnly
+                fontSize={13}
+                showPrintMargin={false}
+                showGutter
+                highlightActiveLine={false}
+                width="100%"
+                height="100%"
+                setOptions={{
+                  showLineNumbers: true,
+                  tabSize: 2,
+                  useWorker: false,
+                }}
+                editorProps={{ $blockScrolling: true }}
+              />
               <button
                 type="button"
                 onClick={handleCopyJson}
-                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium backdrop-blur-md bg-[#f2f2f7]/90 dark:bg-[#2c2c2e]/90 border border-[#c6c6c8]/60 dark:border-[#38383a] text-black dark:text-white shadow-sm hover:bg-[#e5e5ea] dark:hover:bg-[#3a3a3c] cursor-pointer transition-colors"
+                className="absolute bottom-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium backdrop-blur-md bg-[#f2f2f7]/90 dark:bg-[#2c2c2e]/90 border border-[#c6c6c8]/60 dark:border-[#38383a] text-black dark:text-white shadow-sm hover:bg-[#e5e5ea] dark:hover:bg-[#3a3a3c] cursor-pointer transition-colors"
               >
                 {copied ? (
                   <>
@@ -513,16 +543,87 @@ function DemoApp() {
             }`}
           />
 
-          <div className="flex-1 min-h-0 p-4 overflow-auto">
-            <h3 className="mt-0 mb-2.5 text-[15px] font-semibold tracking-tight">
-              JSON Schema
-            </h3>
-            <pre className="m-0 bg-white dark:bg-[#1c1c1e] border border-[#c6c6c8]/60 dark:border-[#38383a] rounded-xl p-3.5 text-[13px] overflow-auto">
-              {JSON.stringify(sampleSchema, null, 2)}
-            </pre>
+          <div className="flex-1 min-h-0 p-4 flex flex-col">
+            <div className="flex items-center justify-between mb-2.5 flex-shrink-0">
+              <h3 className="m-0 text-[15px] font-semibold tracking-tight">
+                JSON Schema
+              </h3>
+              {schemaError && (
+                <span className="text-[11px] font-medium text-[#ff3b30] dark:text-[#ff453a] truncate max-w-[65%]">
+                  {schemaError}
+                </span>
+              )}
+            </div>
+            <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden border border-[#c6c6c8]/60 dark:border-[#38383a] bg-white dark:bg-[#1d1f21]">
+              <AceEditor
+                mode="json"
+                theme={darkMode ? 'tomorrow_night' : 'github'}
+                name="demo-schema-editor"
+                value={schemaText}
+                onChange={handleSchemaTextChange}
+                fontSize={13}
+                showPrintMargin={false}
+                showGutter
+                highlightActiveLine
+                width="100%"
+                height="100%"
+                setOptions={{
+                  showLineNumbers: true,
+                  tabSize: 2,
+                  useWorker: false,
+                }}
+                editorProps={{ $blockScrolling: true }}
+              />
+              <button
+                type="button"
+                disabled={!isSchemaDirty || Boolean(schemaError)}
+                onClick={handleUpdateSchema}
+                className={`absolute bottom-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium shadow-md transition-opacity ${
+                  !isSchemaDirty || schemaError
+                    ? 'bg-[#8e8e93]/25 text-[#8e8e93] cursor-not-allowed'
+                    : 'bg-[#007aff] dark:bg-[#0a84ff] text-white cursor-pointer hover:opacity-90'
+                }`}
+              >
+                Update editor
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {isUpdating && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 dark:bg-black/45 backdrop-blur-[2px] cursor-wait"
+        >
+          <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/95 dark:bg-[#2c2c2e]/95 border border-[#c6c6c8]/60 dark:border-[#38383a] shadow-xl">
+            <svg
+              className="animate-spin h-5 w-5 text-[#007aff] dark:text-[#0a84ff]"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              />
+            </svg>
+            <span className="text-[14px] font-medium text-black dark:text-white">
+              Updating editor...
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

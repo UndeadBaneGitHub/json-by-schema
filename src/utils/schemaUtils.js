@@ -148,6 +148,26 @@ export function generateIdPrefixFromPath(path) {
   return `bypath-${path ? `${path}-` : ''}`;
 }
 
+export function isValueTypeMatch(value, type) {
+  switch (type) {
+    case 'string':
+      return typeof value === 'string';
+    case 'integer':
+    case 'number':
+      return typeof value === 'number' && !Number.isNaN(value);
+    case 'boolean':
+      return typeof value === 'boolean';
+    case 'array':
+      return Array.isArray(value);
+    case 'object':
+      return value !== null && typeof value === 'object' && !Array.isArray(value);
+    case 'null':
+      return value === null;
+    default:
+      return true;
+  }
+}
+
 export function setValueType(value, type) {
   switch (type) {
     case 'string':
@@ -252,7 +272,15 @@ export function stripPathOfSchemaIndex(path) {
 }
 
 export function isMultipleChoiceSchema(schema) {
-  return schema && !!(schema.allOf || schema.oneOf || schema.anyOf);
+  return (
+    schema &&
+    !!(
+      schema.allOf ||
+      schema.oneOf ||
+      schema.anyOf ||
+      Array.isArray(schema.type)
+    )
+  );
 }
 
 export function getMultipleChoiceSchemaChoices(schema) {
@@ -271,6 +299,11 @@ export function getMultipleChoiceSchemaChoices(schema) {
       return {
         type: 'anyOf',
         value: schema.anyOf,
+      };
+    } else if (Array.isArray(schema.type)) {
+      return {
+        type: 'oneOf',
+        value: normalizeTypeArraySchema(schema).oneOf,
       };
     }
   }
@@ -318,6 +351,20 @@ function inferMatchingSchemaIndexes(config, schema, rootSchema) {
       schemaIndexes,
       rootSchema,
     );
+
+    if (
+      schemaIndexesStrs.length > 1 &&
+      schemaByIndexes &&
+      schemaByIndexes.type === 'null'
+    ) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    if (config === null && schemaByIndexes && schemaByIndexes.allowsNull) {
+      return schemaIndexes;
+    }
+
     const validationRes = validateConfig(config, schemaByIndexes, rootSchema);
 
     const errors = validationRes.errors || [];
@@ -333,18 +380,20 @@ function inferMatchingSchemaIndexes(config, schema, rootSchema) {
       continue;
     }
 
-    Object.keys(config).forEach((propName) => {
-      const propSchema = getSchemaForPropertyName(
-        schemaByIndexes,
-        propName,
-        rootSchema,
-      );
-      if (!propSchema) {
-        errors.push(
-          new Error(`No schema was found for property "${propName}"`),
+    if (config && typeof config === 'object' && !Array.isArray(config)) {
+      Object.keys(config).forEach((propName) => {
+        const propSchema = getSchemaForPropertyName(
+          schemaByIndexes,
+          propName,
+          rootSchema,
         );
-      }
-    });
+        if (!propSchema) {
+          errors.push(
+            new Error(`No schema was found for property "${propName}"`),
+          );
+        }
+      });
+    }
 
     if (minErrCount < 0) {
       minErrCount = errors.length;
@@ -364,7 +413,7 @@ export function inferSchemaIndexes(props, rootSchema) {
 
   if (
     !schema ||
-    isConfigEmpty(config, schema) ||
+    (isConfigEmpty(config, schema) && config !== null) ||
     !isMultipleChoiceSchema(schema)
   ) {
     return List();
@@ -448,9 +497,27 @@ export function hasFilter(filter, title, name, config, schema) {
   );
 }
 
+function normalizeTypeArraySchema(schema) {
+  if (!schema || !Array.isArray(schema.type)) {
+    return schema;
+  }
+
+  const { type: types, ...rest } = schema;
+  const allowsNull = types.includes('null') && types.length > 1;
+  return {
+    ...rest,
+    oneOf: types.map((t) => ({
+      ...rest,
+      title: t,
+      type: t,
+      ...(allowsNull && t !== 'null' ? { allowsNull: true } : {}),
+    })),
+  };
+}
+
 export function deRefSchema(schema, rootSchema) {
   if (!schema || !schema.$ref || !rootSchema) {
-    return schema;
+    return normalizeTypeArraySchema(schema);
   }
 
   const ref = schema.$ref;
@@ -474,5 +541,5 @@ export function deRefSchema(schema, rootSchema) {
 
   resolvedRef = resolvedRef || {};
 
-  return { ...schema, $ref: undefined, ...resolvedRef };
+  return normalizeTypeArraySchema({ ...schema, $ref: undefined, ...resolvedRef });
 }

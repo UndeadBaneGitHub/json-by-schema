@@ -32,6 +32,7 @@ function renderOptions(props) {
   return schemaChoices.value.map((schema, index) => ({
     value: index,
     label: getSchemaTitle(schema, index, props.intl),
+    disabled: schemaChoices.value.length > 1 && schema && schema.type === 'null',
   }));
 }
 

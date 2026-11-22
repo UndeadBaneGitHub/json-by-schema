@@ -15,6 +15,7 @@ import { List } from 'immutable';
 import injectReducer from '../../utils/injectReducer';
 import { getSelectedSchema } from '../../utils/schemaUtils';
 import { resolveThemeProps } from '../../theme';
+import UnsavedChangesContext from '../../components/UnsavedChangesContext';
 
 import ObjectPanel from '../../containers/ObjectPanel/Loadable';
 import { makeSelectSchemaIndexes } from '../../containers/ObjectPanel/selectors';
@@ -44,8 +45,33 @@ export class Editor extends React.PureComponent {
         initialDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       }
     }
+    this.unsavedState = { hasUnsaved: false, discard: null };
     this.state = {
       internalDarkMode: initialDark,
+      pendingNavigation: null,
+    };
+    this.setUnsavedState = (hasUnsaved, discard) => {
+      this.unsavedState = { hasUnsaved, discard };
+    };
+    this.guardNavigation = (fn) => {
+      if (this.unsavedState.hasUnsaved) {
+        this.setState({ pendingNavigation: fn });
+      } else {
+        fn();
+      }
+    };
+    this.handleProceedAndUndo = () => {
+      const { pendingNavigation } = this.state;
+      if (this.unsavedState.discard) {
+        this.unsavedState.discard();
+      }
+      this.unsavedState = { hasUnsaved: false, discard: null };
+      this.setState({ pendingNavigation: null }, () => {
+        if (pendingNavigation) pendingNavigation();
+      });
+    };
+    this.handleCancelNavigation = () => {
+      this.setState({ pendingNavigation: null });
     };
     this.toggleInternalDarkMode = () => {
       this.setState((prev) => {
@@ -137,9 +163,44 @@ export class Editor extends React.PureComponent {
     const rootClassName = isDark ? 'json-by-schema dark' : 'json-by-schema';
 
     return (
-      <Wrapper className={rootClassName} {...themeProps}>
-        <ObjectPanel {...configPanelProps} />
-        {!isControlled && (
+      <UnsavedChangesContext.Provider
+        value={{
+          setUnsavedState: this.setUnsavedState,
+          guardNavigation: this.guardNavigation,
+        }}
+      >
+        <Wrapper className={rootClassName} {...themeProps}>
+          <ObjectPanel {...configPanelProps} />
+          {this.state.pendingNavigation && (
+            <div
+              role="alertdialog"
+              aria-modal="true"
+              className="absolute inset-0 z-[90] flex items-center justify-center bg-black/30 dark:bg-black/55 backdrop-blur-[2px]"
+            >
+              <div className="w-[340px] max-w-[90%] rounded-[var(--jbs-radius-lg)] bg-[var(--jbs-popover-bg)] border border-[var(--jbs-border)] shadow-2xl p-5 text-[var(--jbs-text)]">
+                <p className="m-0 text-[15px] font-medium text-center mb-4">
+                  You have unsaved changes.
+                </p>
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={this.handleCancelNavigation}
+                    className="px-3.5 py-1.5 rounded-[var(--jbs-radius)] text-[13px] font-medium border border-[var(--jbs-border)] text-[var(--jbs-text)] hover:bg-[var(--jbs-bg-hover)] cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={this.handleProceedAndUndo}
+                    className="px-3.5 py-1.5 rounded-[var(--jbs-radius)] text-[13px] font-medium bg-[var(--jbs-danger)] text-white hover:opacity-90 cursor-pointer"
+                  >
+                    Proceed and undo changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {!isControlled && (
           <div className="absolute bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md bg-[var(--jbs-popover-bg)] border border-[var(--jbs-border)] shadow-lg">
             <span className="text-[var(--jbs-text-secondary)] flex items-center" aria-hidden="true">
               {isDark ? (
@@ -178,7 +239,8 @@ export class Editor extends React.PureComponent {
             </button>
           </div>
         )}
-      </Wrapper>
+        </Wrapper>
+      </UnsavedChangesContext.Provider>
     );
   }
 }

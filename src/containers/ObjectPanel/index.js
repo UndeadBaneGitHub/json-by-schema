@@ -11,7 +11,8 @@ import ImmutableProptypes from 'react-immutable-proptypes';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
-import { injectIntl, FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import UnsavedChangesContext from '../../components/UnsavedChangesContext';
 import { arrayMove } from '@dnd-kit/sortable';
 
 import {
@@ -94,6 +95,8 @@ import EditAsJSONButtonWrapper from './EditAsJSONButtonWrapper';
 import ContentWrapper from './ContentWrapper';
 
 export class ObjectPanel extends React.Component {
+  static contextType = UnsavedChangesContext;
+
   static prefixPath(path, schemaIndexes) {
     if (!path && schemaIndexes && schemaIndexes.size) {
       return `{${schemaIndexes.join(',')}}${path}`;
@@ -122,7 +125,13 @@ export class ObjectPanel extends React.Component {
     this.handleEditAsJSONClick = (evt) => {
       stopPropagation(evt);
 
-      this.props.toggleEditAsJson(this.props.path);
+      const guard = this.context && this.context.guardNavigation;
+      const toggle = () => this.props.toggleEditAsJson(this.props.path);
+      if (guard) {
+        guard(toggle);
+      } else {
+        toggle();
+      }
     };
 
     this.updateScrollableWrapperPosition = () => {
@@ -455,11 +464,19 @@ export class ObjectPanel extends React.Component {
     }
   }
 
+  safeUpdatePath(nextPath) {
+    if (this.context && this.context.guardNavigation) {
+      this.context.guardNavigation(() => this.props.updatePath(nextPath));
+    } else {
+      this.props.updatePath(nextPath);
+    }
+  }
+
   handleErrorClick(path, evt) {
     stopPropagation(evt);
 
     if (this.props.configEditorPath !== path) {
-      this.props.updatePath(path);
+      this.safeUpdatePath(path);
     }
   }
 
@@ -472,7 +489,7 @@ export class ObjectPanel extends React.Component {
 
     if (openProperty && String(propName) === openProperty.name) {
       // just close it
-      this.props.updatePath(prefixedPath);
+      this.safeUpdatePath(prefixedPath);
       return;
     }
 
@@ -510,7 +527,7 @@ export class ObjectPanel extends React.Component {
     }
 
     if (this.props.configEditorPath !== property.path) {
-      this.props.updatePath(property.path);
+      this.safeUpdatePath(property.path);
     }
   }
 
@@ -625,7 +642,7 @@ export class ObjectPanel extends React.Component {
       const { name, parentPath } = this.props;
 
       const newPath = genPath(name, parentPath, schemaIndexes);
-      this.props.updatePath(newPath);
+      this.safeUpdatePath(newPath);
     }
   }
 

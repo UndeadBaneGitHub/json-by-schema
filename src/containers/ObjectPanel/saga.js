@@ -237,7 +237,15 @@ export function* updatePanels() {
           parsedLocation[curLocationPart.childPath].schemaIndexes,
         );
 
-        if (isConfigEmpty(openProperty.config, openProperty.schema)) {
+        const isAllowedNull =
+          openProperty.config === null &&
+          openProperty.schema &&
+          openProperty.schema.allowsNull;
+
+        if (
+          !isAllowedNull &&
+          isConfigEmpty(openProperty.config, openProperty.schema)
+        ) {
           // to prevent types collision, if config is empty,
           // generate a new value to guarantee type compliance
           const newConfigValue = generateDefaultValueForProperty(
@@ -261,7 +269,11 @@ export function* updatePanels() {
       makeSelectSchemaIndexes(curLocationPart.path),
     );
 
-    if (storedSchemaIndex !== curLocationPart.schemaIndexes) {
+    if (
+      !storedSchemaIndex ||
+      !storedSchemaIndex.equals ||
+      !storedSchemaIndex.equals(curLocationPart.schemaIndexes)
+    ) {
       yield put(
         selectSchema(curLocationPart.schemaIndexes, curLocationPart.path),
       );

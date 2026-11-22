@@ -45,11 +45,22 @@ function IosSelect({
   }, [open, query]);
 
   const selectOption = (option) => {
+    if (!option || option.disabled) return;
     setOpen(false);
     setQuery('');
     if (onChange) {
       onChange(option);
     }
+  };
+
+  const findNextEnabledIndex = (startIdx, step) => {
+    if (!filteredOptions.length) return 0;
+    let idx = startIdx;
+    for (let i = 0; i < filteredOptions.length; i += 1) {
+      idx = (idx + step + filteredOptions.length) % filteredOptions.length;
+      if (!filteredOptions[idx].disabled) return idx;
+    }
+    return startIdx;
   };
 
   const handleKeyDown = (e) => {
@@ -63,20 +74,15 @@ function IosSelect({
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        filteredOptions.length ? (prev + 1) % filteredOptions.length : 0,
-      );
+      setHighlightedIndex((prev) => findNextEnabledIndex(prev, 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        filteredOptions.length
-          ? (prev - 1 + filteredOptions.length) % filteredOptions.length
-          : 0,
-      );
+      setHighlightedIndex((prev) => findNextEnabledIndex(prev, -1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (filteredOptions[highlightedIndex]) {
-        selectOption(filteredOptions[highlightedIndex]);
+      const opt = filteredOptions[highlightedIndex];
+      if (opt && !opt.disabled) {
+        selectOption(opt);
       }
     } else if (e.key === 'Escape') {
       e.preventDefault();
@@ -160,21 +166,27 @@ function IosSelect({
           ) : (
             filteredOptions.map((opt, idx) => {
               const isSelected = selectedOption && opt.value === selectedOption.value;
-              const isHighlighted = idx === highlightedIndex;
+              const isDisabled = Boolean(opt.disabled);
+              const isHighlighted = !isDisabled && idx === highlightedIndex;
               return (
                 <li
                   key={String(opt.value)}
                   role="option"
                   aria-selected={isSelected}
-                  onMouseEnter={() => setHighlightedIndex(idx)}
+                  aria-disabled={isDisabled}
+                  onMouseEnter={() => {
+                    if (!isDisabled) setHighlightedIndex(idx);
+                  }}
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    selectOption(opt);
+                    if (!isDisabled) selectOption(opt);
                   }}
-                  className={`relative flex items-center px-7 py-2 rounded-[var(--jbs-radius)] text-[14px] cursor-pointer select-none ${
-                    isHighlighted
-                      ? 'bg-[var(--jbs-accent)] text-[var(--jbs-accent-contrast)]'
-                      : 'text-[var(--jbs-text)]'
+                  className={`relative flex items-center px-7 py-2 rounded-[var(--jbs-radius)] text-[14px] select-none ${
+                    isDisabled
+                      ? 'text-[var(--jbs-text-muted)] opacity-50 cursor-not-allowed'
+                      : isHighlighted
+                        ? 'bg-[var(--jbs-accent)] text-[var(--jbs-accent-contrast)] cursor-pointer'
+                        : 'text-[var(--jbs-text)] cursor-pointer'
                   }`}
                 >
                   {isSelected && (
@@ -201,6 +213,7 @@ IosSelect.propTypes = {
     PropTypes.shape({
       value: PropTypes.any,
       label: PropTypes.node.isRequired,
+      disabled: PropTypes.bool,
     }),
   ).isRequired,
   onChange: PropTypes.func.isRequired,

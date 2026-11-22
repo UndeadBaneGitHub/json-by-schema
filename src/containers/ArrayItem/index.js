@@ -36,6 +36,7 @@ import ItemInfoWrapper from '../../components/ItemInfoWrapper';
 import ValueLine from '../../components/ValueLine/index';
 import ItemNameWrapper from '../../components/ItemNameWrapper';
 import SchemaSelectorsStack from '../../containers/SchemaSelectorsStack';
+import UnsavedChangesContext from '../../components/UnsavedChangesContext';
 import ItemButtonsWrapper from '../../components/ItemButtonsWrapper';
 import RevertItemButton from '../../components/RevertItemButton';
 import { makeSelectSchema as makeSelectRootSchema } from '../../containers/Editor/selectors';
@@ -47,6 +48,8 @@ import messages from './messages';
 import DragHandle from './DragHandle';
 
 export class ArrayItem extends React.PureComponent {
+  static contextType = UnsavedChangesContext;
+
   // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -62,19 +65,11 @@ export class ArrayItem extends React.PureComponent {
         }
         // eslint-disable-next-line react/no-find-dom-node
         const node = ReactDOM.findDOMNode(self);
-        if (node) {
-          let scrollableContainerNode;
-          if (this.props.scrollableContainer) {
-            // eslint-disable-next-line react/no-find-dom-node
-            scrollableContainerNode = ReactDOM.findDOMNode(
-              this.props.scrollableContainer,
-            );
-          }
-
-          scrollIntoViewIfNeeded(node, {
-            duration: 200,
-            centerIfNeeded: true,
-            boundary: scrollableContainerNode,
+        if (node && typeof node.scrollIntoView === 'function') {
+          node.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest',
           });
         }
       });
@@ -147,7 +142,11 @@ export class ArrayItem extends React.PureComponent {
       const { name, parentPath } = this.props;
 
       const newPath = genPath(name, parentPath, schemaIndexes);
-      this.props.updatePath(newPath);
+      if (this.context && this.context.guardNavigation) {
+        this.context.guardNavigation(() => this.props.updatePath(newPath));
+      } else {
+        this.props.updatePath(newPath);
+      }
     }
   }
 
