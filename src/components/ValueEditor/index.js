@@ -172,7 +172,7 @@ function getEditor(props) {
       return (
         <Input
           type={'number'}
-          value={props.value}
+          value={props.strValue !== undefined ? props.strValue : (props.value ?? '')}
           onChange={props.onChange}
           step={'any'}
         />
@@ -182,7 +182,7 @@ function getEditor(props) {
       return (
         <Input
           type={'number'}
-          value={props.value}
+          value={props.strValue !== undefined ? props.strValue : (props.value ?? '')}
           onChange={props.onChange}
           step={1}
         />

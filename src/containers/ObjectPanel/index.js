@@ -18,6 +18,7 @@ import {
   getAbsoluteHeight,
   isNumber,
   stopPropagation,
+  scrollPanelIntoView,
 } from '../../utils/generalUtils';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
@@ -205,6 +206,9 @@ export class ObjectPanel extends React.Component {
 
     this.updateScrollableWrapperPosition();
     window.addEventListener('resize', this.updateScrollableWrapperPosition);
+    if (this.props.isChild) {
+      scrollPanelIntoView(this.panelRef);
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -234,6 +238,13 @@ export class ObjectPanel extends React.Component {
         );
         this.props.updateOpenPropertyByPath(nextOpenProperty, this.props.path);
       }
+    }
+
+    if (
+      (this.props.isChild && prevProps.path !== this.props.path) ||
+      (!prevProps.editAsJSON && this.props.editAsJSON)
+    ) {
+      scrollPanelIntoView(this.panelRef);
     }
 
     this.updateScrollableWrapperPosition();
@@ -508,8 +519,6 @@ export class ObjectPanel extends React.Component {
 
     const { config, path, schemaIndexes, rootSchema } = this.props;
 
-    this.props.updatePath(this.props.path);
-
     const prefixedPath = ObjectPanel.prefixPath(path, schemaIndexes);
 
     // we always generate a new array
@@ -529,6 +538,7 @@ export class ObjectPanel extends React.Component {
     const newConfig = assuredConfig.concat([property.config]);
 
     this.props.updateConfigForPath(newConfig, path);
+    this.props.updatePath(property.path);
   }
 
   handleItemsReorder({ oldIndex, newIndex }) {
@@ -894,7 +904,13 @@ export class ObjectPanel extends React.Component {
     const ownErrorsCount = this.getErrorsCount();
 
     return (
-      <Wrapper isChild={this.props.isChild} isJSONMode={this.props.editAsJSON}>
+      <Wrapper
+        ref={(panelRef) => {
+          this.panelRef = panelRef;
+        }}
+        isChild={this.props.isChild}
+        isJSONMode={this.props.editAsJSON}
+      >
         {editAsJSON ? null : (
           <ContentWrapper>
             {this.renderSchemaSelector()}

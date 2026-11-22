@@ -14,7 +14,7 @@ import Highlighter from 'react-highlight-words';
 
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
-import { genId, stopPropagation } from '../../utils/generalUtils';
+import { genId, stopPropagation, scrollPanelIntoView } from '../../utils/generalUtils';
 import { setValueType, validateConfig } from '../../utils/schemaUtils';
 
 import ValueEditor from '../../components/ValueEditor';
@@ -48,7 +48,7 @@ export class PropertyEditor extends React.PureComponent {
       ) {
         return JSON.stringify(config, null, 2);
       }
-      return String(config);
+      return config === undefined ? '' : String(config);
     };
 
     this.onKeyDown = (evt) => {
@@ -98,6 +98,7 @@ export class PropertyEditor extends React.PureComponent {
       this.getConfigString(this.props.config),
       this.props.path,
     );
+    scrollPanelIntoView(this.panelRef);
   }
 
   componentDidUpdate(prevProps) {
@@ -107,6 +108,7 @@ export class PropertyEditor extends React.PureComponent {
         this.getConfigString(this.props.config),
         this.props.path,
       );
+      scrollPanelIntoView(this.panelRef);
     }
   }
 
@@ -190,7 +192,13 @@ export class PropertyEditor extends React.PureComponent {
     const schemaDescription = this.props.schema.description;
 
     return (
-      <Wrapper className={'scroll-style'} isChild={this.props.isChild}>
+      <Wrapper
+        ref={(panelRef) => {
+          this.panelRef = panelRef;
+        }}
+        className={'scroll-style'}
+        isChild={this.props.isChild}
+      >
         <ItemNameWrapper>
           <Highlighter
             caseSensitive={false}

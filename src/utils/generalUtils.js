@@ -55,3 +55,14 @@ export function isString(value) {
 export function identity(value) {
   return value;
 }
+
+export function scrollPanelIntoView(el) {
+  if (!el) return;
+  window.requestAnimationFrame(() => {
+    el.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'nearest',
+    });
+  });
+}

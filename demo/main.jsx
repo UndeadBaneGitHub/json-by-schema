@@ -4,51 +4,149 @@ import { JsonBySchema } from '../src';
 
 const sampleSchema = {
   $schema: 'http://json-schema.org/draft-04/schema#',
-  title: 'Application Config',
+  title: 'Comprehensive Schema Example',
   type: 'object',
-  required: ['serviceName', 'port'],
+  required: ['serviceName', 'port', 'enabled'],
   properties: {
     serviceName: {
       type: 'string',
-      description: 'Name of the service',
+      description: 'String field (minLength: 2, pattern)',
       minLength: 2,
+      pattern: '^[a-z0-9-]+$',
     },
     port: {
       type: 'integer',
-      description: 'Listening port',
+      description: 'Integer field (1 - 65535)',
       minimum: 1,
       maximum: 65535,
+    },
+    timeoutSeconds: {
+      type: 'number',
+      description: 'Number (float) field',
+      minimum: 0.1,
+      maximum: 300,
     },
     environment: {
       type: 'string',
       enum: ['development', 'staging', 'production'],
-      description: 'Deployment environment',
+      description: 'Enum field',
     },
     enabled: {
       type: 'boolean',
-      description: 'Whether the service is enabled',
+      description: 'Boolean field',
+    },
+    nullableMarker: {
+      type: 'null',
+      description: 'Null type field',
     },
     tags: {
       type: 'array',
-      description: 'Service tags',
+      description: 'Array of strings (uniqueItems)',
+      uniqueItems: true,
       items: {
         type: 'string',
       },
     },
+    scores: {
+      type: 'array',
+      description: 'Array of numbers',
+      items: {
+        type: 'number',
+      },
+    },
+    endpoints: {
+      type: 'array',
+      description: 'Array of objects',
+      minItems: 1,
+      items: {
+        type: 'object',
+        required: ['url', 'method'],
+        properties: {
+          url: { type: 'string' },
+          method: { type: 'string', enum: ['GET', 'POST', 'PUT', 'DELETE'] },
+          retries: { type: 'integer', minimum: 0 },
+        },
+      },
+    },
+    coordinateTuple: {
+      type: 'array',
+      description: 'Tuple array (fixed positional items)',
+      items: [
+        { type: 'string', title: 'Label' },
+        { type: 'number', title: 'Latitude' },
+        { type: 'number', title: 'Longitude' },
+      ],
+    },
     database: {
       type: 'object',
-      description: 'Database connection settings',
+      description: 'Nested object',
       properties: {
         host: { type: 'string' },
         port: { type: 'integer' },
         ssl: { type: 'boolean' },
       },
     },
+    auth: {
+      description: 'oneOf schema choice',
+      oneOf: [
+        {
+          title: 'API Key',
+          type: 'object',
+          required: ['apiKey'],
+          properties: {
+            apiKey: { type: 'string' },
+          },
+        },
+        {
+          title: 'Basic Auth',
+          type: 'object',
+          required: ['username', 'password'],
+          properties: {
+            username: { type: 'string' },
+            password: { type: 'string' },
+          },
+        },
+      ],
+    },
+    notificationTarget: {
+      description: 'anyOf schema choice',
+      anyOf: [
+        {
+          title: 'Email Address',
+          type: 'string',
+        },
+        {
+          title: 'Webhook',
+          type: 'object',
+          properties: {
+            webhookUrl: { type: 'string' },
+            secret: { type: 'string' },
+          },
+        },
+      ],
+    },
+    metadata: {
+      description: 'allOf composed object',
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            owner: { type: 'string' },
+          },
+        },
+        {
+          type: 'object',
+          properties: {
+            version: { type: 'integer' },
+          },
+        },
+      ],
+    },
   },
   patternProperties: {
     '^x-': {
       type: 'string',
-      description: 'Custom extension header',
+      description: 'Pattern property (^x-)',
     },
   },
 };
@@ -56,14 +154,34 @@ const sampleSchema = {
 const initialConfig = {
   serviceName: 'my-service',
   port: 8080,
+  timeoutSeconds: 12.5,
   environment: 'development',
   enabled: true,
+  nullableMarker: null,
   tags: ['api', 'v1'],
+  scores: [0.95, 1.5],
+  endpoints: [
+    {
+      url: 'https://api.example.com/health',
+      method: 'GET',
+      retries: 3,
+    },
+  ],
+  coordinateTuple: ['HQ', 52.52, 13.405],
   database: {
     host: 'localhost',
     port: 5432,
     ssl: false,
   },
+  auth: {
+    apiKey: 'secret-key-123',
+  },
+  notificationTarget: 'alerts@example.com',
+  metadata: {
+    owner: 'platform-team',
+    version: 1,
+  },
+  'x-custom-header': 'enabled',
 };
 
 function DemoApp() {
