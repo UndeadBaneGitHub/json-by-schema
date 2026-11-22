@@ -114,7 +114,8 @@ export function getSchemaForPropertyName(schema, propName, rootSchema) {
       if (!res && schema.patternProperties) {
         const patterns = Object.keys(schema.patternProperties);
 
-        for (let i = 0, pattern = patterns[i]; i < patterns.length; i++) {
+        for (let i = 0; i < patterns.length; i++) {
+          const pattern = patterns[i];
           if (isPatternMatchingName(pattern, propName)) {
             res = schema.patternProperties[pattern];
             break;
@@ -484,16 +485,17 @@ export function hasFilter(filter, title, name, config, schema) {
     return false;
   }
 
+  const normalizedFilter = String(filter).toLowerCase();
   const searchableConfig = (config ? JSON.stringify(config) : '').toLowerCase();
   const searchableSchema = (schema ? JSON.stringify(schema) : '').toLowerCase();
   const searchableName = String(name).toLowerCase();
   const searchableTitle = String(title).toLowerCase();
 
   return (
-    searchableTitle.includes(filter) ||
-    searchableName.includes(filter) ||
-    searchableConfig.includes(filter) ||
-    searchableSchema.includes(filter)
+    searchableTitle.includes(normalizedFilter) ||
+    searchableName.includes(normalizedFilter) ||
+    searchableConfig.includes(normalizedFilter) ||
+    searchableSchema.includes(normalizedFilter)
   );
 }
 
