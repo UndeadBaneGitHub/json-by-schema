@@ -1,7 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Li = styled.li`
-  list-style: none;
-`;
+const Li = React.forwardRef(({ className = '', ...rest }, ref) => (
+  <li ref={ref} className={`list-none ${className}`} {...rest} />
+));
 
 export default Li;

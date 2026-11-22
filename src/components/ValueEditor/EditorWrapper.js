@@ -1,9 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const EditorWrapper = styled.div`
-  padding: 0.5em 0;
-  width: 100%;
-  min-width: 100%;
-`;
+const EditorWrapper = ({ className = '', ...rest }) => (
+  <div className={`py-[0.5em] w-full min-w-full ${className}`} {...rest} />
+);
 
 export default EditorWrapper;

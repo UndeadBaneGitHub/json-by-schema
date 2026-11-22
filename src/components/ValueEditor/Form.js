@@ -1,5 +1,5 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Form = styled.form``;
+const Form = (props) => <form {...props} />;
 
 export default Form;

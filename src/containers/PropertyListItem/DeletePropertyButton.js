@@ -1,8 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const DeletePropertyButton = styled.a`
-  color: rgba(235, 0, 0, 0.8);
-  text-decoration: underline;
-`;
+const DeletePropertyButton = ({ className = '', ...rest }) => (
+  <a className={`text-[rgba(235,0,0,0.8)] underline ${className}`} {...rest} />
+);
 
 export default DeletePropertyButton;

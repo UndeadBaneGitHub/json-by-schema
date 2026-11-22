@@ -1,7 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Wrapper = styled.div`
-  background-color: #fff;
-`;
+const Wrapper = ({ className = '', ...rest }) => (
+  <div className={`bg-white ${className}`} {...rest} />
+);
 
 export default Wrapper;

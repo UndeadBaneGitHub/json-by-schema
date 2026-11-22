@@ -1,11 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const ContentWrapper = styled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-`;
+const ContentWrapper = React.forwardRef(({ className = '', ...rest }, ref) => (
+  <div ref={ref} className={`absolute inset-0 ${className}`} {...rest} />
+));
 
 export default ContentWrapper;

@@ -1,12 +1,11 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const FilterInput = styled.input`
-  outline: none;
-  width: calc(100% - 1.5em);
-  background-color: #dddce1;
-  padding: 0.5em 1em;
-  border-radius: 0.5em;
-  color: black;
-`;
+const FilterInput = React.forwardRef(({ className = '', ...rest }, ref) => (
+  <input
+    ref={ref}
+    className={`outline-none w-[calc(100%-2em)] bg-[#dddce1] px-[1em] py-[0.5em] rounded-[0.5em] text-black ${className}`}
+    {...rest}
+  />
+));
 
 export default FilterInput;

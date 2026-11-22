@@ -1,9 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Wrapper = styled.div`
-  width: 100%;
-  font-weight: normal;
-  padding-right: 30px;
-`;
+const Wrapper = ({ className = '', ...rest }) => (
+  <div className={`w-full font-normal pr-[30px] ${className}`} {...rest} />
+);
 
 export default Wrapper;

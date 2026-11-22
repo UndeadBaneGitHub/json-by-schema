@@ -1,36 +1,10 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Wrapper = styled.div`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  background-color: #fff;
-  width: ${(props) => (props.isJSONMode ? 600 : 450)}px;
-  max-width: ${(props) => (props.isJSONMode ? 600 : 450)}px;
-  left: ${(props) => (props.isChild ? '450px' : '0')};
-
-  border-right: 1px solid #e1e1e1;
-
-  padding: 0;
-  overflow: visible;
-
-  &:after {
-    content: '';
-
-    /* Expand element */
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    right: 0px;
-    bottom: 0px;
-
-    -moz-box-shadow: 2px 0 8px rgba(100, 100, 100, 0.55);
-    -webkit-box-shadow: 2px 0 8px rgba(100, 100, 100, 0.55);
-    box-shadow: 2px 0 8px rgba(100, 100, 100, 0.55);
-
-    /* Disable click events */
-    pointer-events: none;
-  }
-`;
+const Wrapper = ({ isJSONMode, isChild, className = '', ...rest }) => (
+  <div
+    className={`absolute top-0 bottom-0 bg-white border-r border-[#e1e1e1] p-0 overflow-visible after:content-[''] after:absolute after:inset-0 after:shadow-[2px_0_8px_rgba(100,100,100,0.55)] after:pointer-events-none ${isJSONMode ? 'w-[600px] max-w-[600px]' : 'w-[450px] max-w-[450px]'} ${isChild ? 'left-[450px]' : 'left-0'} ${className}`}
+    {...rest}
+  />
+);
 
 export default Wrapper;

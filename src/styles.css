@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.json-by-schema {
+  height: 100%;
+  width: 100%;
+  font-family: 'Helvetica Neue', Helvetica, 'Open Sans', Arial, sans-serif;
+}
+
+.json-by-schema.fontLoaded {
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.json-by-schema p,
+.json-by-schema label {
+  font-family: Georgia, Times, 'Times New Roman', serif;
+  line-height: 1.5em;
+}
+
+.json-by-schema .clearfix::before,
+.json-by-schema .clearfix::after {
+  content: ' ';
+  display: table;
+}
+
+.json-by-schema .clearfix::after {
+  clear: both;
+}
+
+.json-by-schema .text-button {
+  padding: 0.6em 0.8em;
+  color: #2b7ccd;
+  font-size: 1.15em;
+  outline: none;
+  font-family: Helvetica, 'Helvetica Neue', 'Open Sans', Arial, sans-serif;
+}
+
+.json-by-schema .text-button:focus {
+  text-decoration: underline;
+}
+
+.json-by-schema input,
+.json-by-schema textarea,
+.json-by-schema select {
+  font-family: Helvetica, 'Helvetica Neue', 'Open Sans', Arial, sans-serif;
+}
+
+.json-by-schema .scroll-style::-webkit-scrollbar {
+  width: 10px;
+}
+
+.json-by-schema .scroll-style::-webkit-scrollbar-track {
+  background: #eee;
+}
+
+.json-by-schema .scroll-style::-webkit-scrollbar-thumb {
+  background: #aaa;
+}
+
+.json-by-schema .hyphenate {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  hyphens: auto;
+}
+
+.json-by-schema .ellipses {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.json-by-schema .property-being-dragged {
+  border: 2px solid #eee;
+  z-index: 50;
+}
+
+@keyframes jbs-circle-fade-delay {
+  0%,
+  39%,
+  100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+.jbs-circle-dot::before {
+  content: '';
+  display: block;
+  margin: 0 auto;
+  width: 15%;
+  height: 15%;
+  background-color: #999;
+  border-radius: 100%;
+  animation: jbs-circle-fade-delay 1.2s infinite ease-in-out both;
+  animation-delay: var(--jbs-delay, 0s);
+}

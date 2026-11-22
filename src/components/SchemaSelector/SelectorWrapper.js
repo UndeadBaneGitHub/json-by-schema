@@ -1,8 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const SelectorWrapper = styled.div`
-  width: 82%;
-  display: inline-block;
-`;
+const SelectorWrapper = ({ className = '', ...rest }) => (
+  <div className={`w-[82%] inline-block ${className}`} {...rest} />
+);
 
 export default SelectorWrapper;

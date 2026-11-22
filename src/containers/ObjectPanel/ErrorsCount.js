@@ -1,12 +1,11 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const ErrorsCount = styled.div`
-  color: rgba(235, 0, 0, 0.8);
-  background-color: #b0b0b0;
-  border-bottom: 2px solid #a0a0a0;
-  padding: 0.5em 1em;
-  font-weight: bold;
-  text-align: center;
-`;
+const ErrorsCount = React.forwardRef(({ className = '', ...rest }, ref) => (
+  <div
+    ref={ref}
+    className={`text-[rgba(235,0,0,0.8)] bg-[#b0b0b0] border-b-2 border-[#a0a0a0] px-[1em] py-[0.5em] font-bold text-center ${className}`}
+    {...rest}
+  />
+));
 
 export default ErrorsCount;

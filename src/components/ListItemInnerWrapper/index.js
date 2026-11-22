@@ -1,83 +1,56 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const ListItemInnerWrapper = styled.div`
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0.7em 1.1em;
-  background-color: ${(props) => {
-    if (props.expanded) {
-      return props.invalid ? '#d88282' : '#e2e2e2';
-    }
-    return props.invalid ? '#ff999a' : '#fff';
-  }};
-  opacity: ${(props) => {
-    if (props.empty) {
-      if (props.expanded) {
-        return 0.6;
-      }
-      return 0.4;
-    }
-    return 1;
-  }};
-  border-left: ${(props) => {
-    if (props.invalid) {
-      return props.expanded ? '4px solid rgba(125,0,0,0.45)' : 'initial';
-    }
-    return props.expanded ? '4px solid rgba(0,0,0, 0.45)' : 'initial';
-  }};
-  font-size: inherit;
-  font-family: 'Helvetica Neue', Helvetica, 'Open Sans', Arial, sans-serif;
-  line-height: 1.5;
-  text-align: left;
-  cursor: inherit;
+function getChangedBackground(expanded, invalid) {
+  if (expanded) {
+    return invalid
+      ? 'repeating-linear-gradient(135deg, rgba(125, 20, 0, 0.5), rgba(125, 20, 0, 0.5) 30px, #d88282 30px, #d88282 60px)'
+      : 'repeating-linear-gradient(135deg, #eeeeee, #eeeeee 30px, #e2e2e2 30px, #e2e2e2 60px)';
+  }
+  if (invalid) {
+    return 'repeating-linear-gradient(135deg, #eeeeee, #eeeeee 30px, #ff999a 30px, #ff999a 60px)';
+  }
+  return 'repeating-linear-gradient(135deg, #eeeeee, #eeeeee 30px, #ffffff 30px, #ffffff 60px)';
+}
 
-  ${(props) => {
-    if (!props.changed) {
-      return '';
-    }
-    if (props.expanded) {
-      if (props.invalid) {
-        return `
-        background: repeating-linear-gradient(
-          135deg,
-          rgba(125, 20, 0, 0.5),
-          rgba(125, 20, 0, 0.5) 30px,
-          #d88282 30px,
-          #d88282 60px
-        );
-        `;
-      }
-      return `
-        background: repeating-linear-gradient(
-          135deg,
-          #eeeeee,
-          #eeeeee 30px,
-          #e2e2e2 30px,
-          #e2e2e2 60px
-        );
-        `;
-    } else if (props.invalid) {
-      return `
-        background: repeating-linear-gradient(
-          135deg,
-          #eeeeee,
-          #eeeeee 30px,
-          #ff999a 30px,
-          #ff999a 60px
-        );
-        `;
-    }
-    return `
-        background: repeating-linear-gradient(
-          135deg,
-          #eeeeee,
-          #eeeeee 30px,
-          #ffffff 30px,
-          #ffffff 60px
-        );
-        `;
-  }};
-`;
+const ListItemInnerWrapper = ({
+  expanded,
+  invalid,
+  empty,
+  changed,
+  className = '',
+  style,
+  ...rest
+}) => {
+  const bgClass = expanded
+    ? invalid
+      ? 'bg-[#d88282]'
+      : 'bg-[#e2e2e2]'
+    : invalid
+      ? 'bg-[#ff999a]'
+      : 'bg-white';
+
+  const opacityClass = empty
+    ? expanded
+      ? 'opacity-60'
+      : 'opacity-40'
+    : 'opacity-100';
+
+  const borderClass = expanded
+    ? invalid
+      ? 'border-l-4 border-l-[rgba(125,0,0,0.45)]'
+      : 'border-l-4 border-l-[rgba(0,0,0,0.45)]'
+    : '';
+
+  return (
+    <div
+      className={`w-full h-full m-0 px-[1.1em] py-[0.7em] leading-normal text-left cursor-inherit [font-family:'Helvetica_Neue',Helvetica,'Open_Sans',Arial,sans-serif] ${bgClass} ${opacityClass} ${borderClass} ${className}`}
+      style={{
+        ...(changed ? { background: getChangedBackground(expanded, invalid) } : {}),
+        ...style,
+      }}
+      {...rest}
+    />
+  );
+};
 
 export default ListItemInnerWrapper;

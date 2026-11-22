@@ -1,13 +1,11 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const EditAsJSONButtonWrapper = styled.div`
-  position: absolute;
-  bottom: 0;
-  display: block;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  border-top: 2px solid #eee;
-`;
+const EditAsJSONButtonWrapper = React.forwardRef(({ className = '', ...rest }, ref) => (
+  <div
+    ref={ref}
+    className={`absolute bottom-0 block w-full m-0 p-0 border-t-2 border-[#eee] ${className}`}
+    {...rest}
+  />
+));
 
 export default EditAsJSONButtonWrapper;

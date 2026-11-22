@@ -1,17 +1,10 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const ListItemWrapper = styled.div`
-  width: 100%;
-  display: block;
-  -webkit-box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  cursor: ${(props) => (props.noSchema ? 'not-allowed' : 'pointer')};
-  position: relative;
-
-  border-bottom: 1px solid #e1e1e1;
-
-  z-index: ${(props) => (props.expanded ? 25 : 'initial')};
-`;
+const ListItemWrapper = ({ noSchema, expanded, className = '', ...rest }) => (
+  <div
+    className={`w-full block box-border m-0 p-0 relative border-b border-[#e1e1e1] ${noSchema ? 'cursor-not-allowed' : 'cursor-pointer'} ${expanded ? 'z-[25]' : ''} ${className}`}
+    {...rest}
+  />
+);
 
 export default ListItemWrapper;

@@ -1,7 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Wrapper = styled.div`
-  margin: 0.5em 0;
-`;
+const Wrapper = ({ className = '', ...rest }) => (
+  <div className={`my-[0.5em] ${className}`} {...rest} />
+);
 
 export default Wrapper;

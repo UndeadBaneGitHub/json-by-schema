@@ -1,9 +1,10 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const ErrorMessageWrapper = styled.div`
-  border-top: 1px solid rgba(235, 0, 0, 0.8);
-  width: 100%;
-  padding: 0.5em 0;
-`;
+const ErrorMessageWrapper = ({ className = '', ...rest }) => (
+  <div
+    className={`border-t border-[rgba(235,0,0,0.8)] w-full py-[0.5em] ${className}`}
+    {...rest}
+  />
+);
 
 export default ErrorMessageWrapper;

@@ -1,12 +1,11 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Textarea = styled.textarea.attrs({ autoFocus: true })`
-  outline: none;
-  width: 100%;
-  background-color: #dddce1;
-  padding: 0.7em;
-  border-radius: 0.5em;
-  color: black;
-`;
+const Textarea = ({ className = '', ...rest }) => (
+  <textarea
+    autoFocus
+    className={`outline-none w-full bg-[#dddce1] p-[0.7em] rounded-[0.5em] text-black ${className}`}
+    {...rest}
+  />
+);
 
 export default Textarea;

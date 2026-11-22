@@ -1,8 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const ValidationErrorsWrapper = styled.div`
-  color: rgba(235, 0, 0, 0.8);
-  font-weight: bold;
-`;
+const ValidationErrorsWrapper = ({ className = '', ...rest }) => (
+  <div className={`text-[rgba(235,0,0,0.8)] font-bold ${className}`} {...rest} />
+);
 
 export default ValidationErrorsWrapper;

@@ -1,8 +1,11 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Wrapper = styled.div`
-  color: rgba(235, 0, 0, 0.8);
-  margin: 0.4em 0 0 0;
-`;
+const Wrapper = React.forwardRef(({ className = '', ...rest }, ref) => (
+  <div
+    ref={ref}
+    className={`text-[rgba(235,0,0,0.8)] mt-[0.4em] ${className}`}
+    {...rest}
+  />
+));
 
 export default Wrapper;

@@ -1,10 +1,20 @@
-import styled from 'styled-components';
+import React from 'react';
+import PropTypes from 'prop-types';
 
-const Wrapper = styled.div`
-  margin: 0 auto;
-  width: ${(props) => props.size || '40px'};
-  height: ${(props) => props.size || '40px'};
-  position: relative;
-`;
+function Wrapper({ size = '40px', className = '', style, ...rest }) {
+  return (
+    <div
+      className={`mx-auto relative ${className}`}
+      style={{ width: size, height: size, ...style }}
+      {...rest}
+    />
+  );
+}
+
+Wrapper.propTypes = {
+  size: PropTypes.string,
+  className: PropTypes.string,
+  style: PropTypes.object,
+};
 
 export default Wrapper;

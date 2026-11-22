@@ -16,7 +16,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 import { IntlProvider } from 'react-intl';
-import 'sanitize.css/sanitize.css';
 
 // Import Language Provider
 import Editor from './containers/Editor/Loadable';
@@ -24,7 +23,7 @@ import Editor from './containers/Editor/Loadable';
 import configureStore from './configureStore';
 
 // Import CSS reset and Global Styles
-import { GlobalStyle } from './global-styles';
+import './styles.css';
 
 // Create redux store with history
 const initialState = {};
@@ -34,18 +33,15 @@ function JsonBySchema(props) {
   return (
     <Provider store={store}>
       <IntlProvider locale={'en'}>
-        <>
-          <GlobalStyle />
-          <Editor
-            config={props.config}
-            onChange={props.onChange}
-            schema={props.schema}
-            path={props.path}
-            onPathChange={props.onPathChange}
-            customValidators={props.customValidators}
-            deltaDepth={props.deltaDepth}
-          />
-        </>
+        <Editor
+          config={props.config}
+          onChange={props.onChange}
+          schema={props.schema}
+          path={props.path}
+          onPathChange={props.onPathChange}
+          customValidators={props.customValidators}
+          deltaDepth={props.deltaDepth}
+        />
       </IntlProvider>
     </Provider>
   );

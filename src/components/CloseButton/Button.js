@@ -1,14 +1,13 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Button = styled.button.attrs({
-  type: 'button',
-})`
-  top: 0;
-  right: 0;
-  position: absolute;
-  padding: 0.4em 0.5em;
-  font-size: 1.1em;
-  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
-`;
+const Button = React.forwardRef(({ disabled, className = '', ...rest }, ref) => (
+  <button
+    ref={ref}
+    type="button"
+    disabled={disabled}
+    className={`top-0 right-0 absolute px-[0.5em] py-[0.4em] text-[1.1em] ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${className}`}
+    {...rest}
+  />
+));
 
 export default Button;

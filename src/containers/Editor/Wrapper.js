@@ -1,11 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Wrapper = styled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-`;
+const Wrapper = ({ className = '', ...rest }) => (
+  <div className={`absolute inset-0 ${className}`} {...rest} />
+);
 
 export default Wrapper;

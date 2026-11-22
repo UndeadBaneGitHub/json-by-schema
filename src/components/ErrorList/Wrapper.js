@@ -1,9 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const ErrorList = styled.div`
-  background: white;
-  z-index: 10;
-  width: 100%;
-`;
+const Wrapper = React.forwardRef(({ className = '', ...rest }, ref) => (
+  <div ref={ref} className={`bg-white z-10 w-full ${className}`} {...rest} />
+));
 
-export default ErrorList;
+export default Wrapper;

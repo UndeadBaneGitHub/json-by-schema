@@ -920,9 +920,7 @@ export class ObjectPanel extends React.Component {
                 onChange={this.handleFilterChange}
                 onClick={this.handleFilterClick}
               />
-              <ResetFilterButton onClick={this.handleFilterReset}>
-                &times;
-              </ResetFilterButton>
+              <ResetFilterButton onClick={this.handleFilterReset} />
             </SearchForm>
             {ownErrorsCount ? (
               <ErrorsCount

@@ -1,16 +1,10 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Wrapper = styled.div`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: ${(props) => (props.isChild ? 450 : 0)}px;
-  width: 600px;
-  max-width: 600px;
-  padding: 1em 1.5em;
-  background-color: #f9f9f9;
-
-  overflow-y: auto;
-`;
+const Wrapper = ({ isChild, className = '', ...rest }) => (
+  <div
+    className={`absolute top-0 bottom-0 w-[600px] max-w-[600px] px-[1.5em] py-[1em] bg-[#f9f9f9] overflow-y-auto ${isChild ? 'left-[450px]' : 'left-0'} ${className}`}
+    {...rest}
+  />
+);
 
 export default Wrapper;

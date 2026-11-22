@@ -1,7 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const ItemInfoWrapper = styled.div`
-  opacity: 0.6;
-`;
+const ItemInfoWrapper = ({ className = '', ...rest }) => (
+  <div className={`opacity-60 ${className}`} {...rest} />
+);
 
 export default ItemInfoWrapper;

@@ -1,11 +1,10 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const NoItemsElementWrapper = styled.h3`
-  width: 100%;
-  height: auto;
-  margin: 1em auto;
-  text-align: center;
-  color: #ccc;
-`;
+const NoItemsElementWrapper = ({ className = '', ...rest }) => (
+  <h3
+    className={`w-full h-auto my-[1em] mx-auto text-center text-[#ccc] ${className}`}
+    {...rest}
+  />
+);
 
 export default NoItemsElementWrapper;

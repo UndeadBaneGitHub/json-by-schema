@@ -1,11 +1,7 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Ul = styled.ul`
-  list-style: none;
-  margin: 0;
-  width: 100%;
-  overflow-y: visible;
-  padding: 0;
-`;
+const Ul = ({ className = '', ...rest }) => (
+  <ul className={`list-none m-0 w-full overflow-y-visible p-0 ${className}`} {...rest} />
+);
 
 export default Ul;

@@ -1,9 +1,11 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const SchemaSelectorWrapper = styled.div`
-  overflow: visible;
-  padding: 0.5em 0.5em 0.5em 1em;
-  background-color: #aaa;
-`;
+const SchemaSelectorWrapper = React.forwardRef(({ className = '', ...rest }, ref) => (
+  <div
+    ref={ref}
+    className={`overflow-visible pt-[0.5em] pr-[0.5em] pb-[0.5em] pl-[1em] bg-[#aaa] ${className}`}
+    {...rest}
+  />
+));
 
 export default SchemaSelectorWrapper;

@@ -1,16 +1,12 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const SubmitButton = styled.input.attrs({
-  type: 'submit',
-})`
-  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
-  opacity: ${(props) => (props.disabled ? '0.3' : '0.75')};
-  width: 100%;
-  text-align: center;
-
-  &:hover {
-    opacity: ${(props) => (props.disabled ? '0.3' : '1')};
-  }
-`;
+const SubmitButton = ({ disabled, className = '', ...rest }) => (
+  <input
+    type="submit"
+    disabled={disabled}
+    className={`w-full text-center ${disabled ? 'cursor-not-allowed opacity-30' : 'cursor-pointer opacity-75 hover:opacity-100'} ${className}`}
+    {...rest}
+  />
+);
 
 export default SubmitButton;

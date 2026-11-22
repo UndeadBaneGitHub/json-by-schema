@@ -1,49 +1,24 @@
-import styled from 'styled-components';
+import React from 'react';
+import PropTypes from 'prop-types';
 
-const Wrapper = styled.div`
-  margin: 0;
-  padding: 0.5em 1em;
+const levelClasses = {
+  0: 'border-[#eee] text-[#eee]',
+  1: 'border-[lightblue] text-[lightblue]',
+  2: 'border-[lightyellow] text-[lightyellow]',
+  3: 'border-[rgba(235,0,0,0.8)] text-[rgba(235,0,0,0.8)]',
+};
 
-  border-bottom: 2px solid;
-  &:first-child {
-    border-top: 2px solid;
-  }
+const Wrapper = React.forwardRef(({ level, className = '', ...rest }, ref) => (
+  <div
+    ref={ref}
+    className={`m-0 px-[1em] py-[0.5em] border-b-2 first:border-t-2 font-bold text-center bg-[#ccc] w-full cursor-pointer ${levelClasses[level] || 'border-transparent'} ${className}`}
+    {...rest}
+  />
+));
 
-  border-color: ${(props) => {
-    switch (props.level) {
-      case 0: // debug
-        return '#eee';
-      case 1: // info
-        return 'lightblue';
-      case 2: // warning
-        return 'lightyellow';
-      case 3: // error
-        return 'rgba(235, 0, 0, 0.8)';
-      default:
-        return 'none';
-    }
-  }};
-  color: ${(props) => {
-    switch (props.level) {
-      case 0: // debug
-        return '#eee';
-      case 1: // info
-        return 'lightblue';
-      case 2: // warning
-        return 'lightyellow';
-      case 3: // error
-        return 'rgba(235, 0, 0, 0.8)';
-      default:
-        return 'none';
-    }
-  }};
-  font-weight: bold;
-  text-align: center;
-  background-color: #ccc;
-
-  width: 100%;
-
-  cursor: pointer;
-`;
+Wrapper.propTypes = {
+  level: PropTypes.number,
+  className: PropTypes.string,
+};
 
 export default Wrapper;

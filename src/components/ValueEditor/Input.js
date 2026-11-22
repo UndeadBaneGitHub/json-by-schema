@@ -1,12 +1,11 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const Input = styled.input.attrs({ autoFocus: true })`
-  outline: none;
-  width: 100%;
-  background-color: #dddce1;
-  padding: 0.5em 1em;
-  border-radius: 0.5em;
-  color: black;
-`;
+const Input = ({ className = '', ...rest }) => (
+  <input
+    autoFocus
+    className={`outline-none w-full bg-[#dddce1] px-[1em] py-[0.5em] rounded-[0.5em] text-black ${className}`}
+    {...rest}
+  />
+);
 
 export default Input;

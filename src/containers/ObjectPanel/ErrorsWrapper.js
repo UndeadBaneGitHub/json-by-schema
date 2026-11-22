@@ -1,13 +1,11 @@
-import styled from 'styled-components';
+import React from 'react';
 
-const ErrorsWrapper = styled.div`
-  position: absolute;
-  width: 100%;
-  max-height: 30%;
-  z-index: 10;
-
-  overflow-y: auto;
-  overflow-x: hidden;
-`;
+const ErrorsWrapper = React.forwardRef(({ className = '', ...rest }, ref) => (
+  <div
+    ref={ref}
+    className={`absolute w-full max-h-[30%] z-10 overflow-y-auto overflow-x-hidden ${className}`}
+    {...rest}
+  />
+));
 
 export default ErrorsWrapper;
