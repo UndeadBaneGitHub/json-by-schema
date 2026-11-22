@@ -192,6 +192,58 @@ const PRESET_LABELS = {
   swagger: 'Swagger',
 };
 
+const JSON_TOKEN_REGEX =
+  /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g;
+
+function HighlightedJson({ data }) {
+  const text = JSON.stringify(data, null, 2) || '';
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  JSON_TOKEN_REGEX.lastIndex = 0;
+  while ((match = JSON_TOKEN_REGEX.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(
+        <span key={`p-${lastIndex}`} className="text-[#6e7781] dark:text-[#8b949e]">
+          {text.slice(lastIndex, match.index)}
+        </span>,
+      );
+    }
+
+    const token = match[0];
+    let cls = 'text-[#0550ae] dark:text-[#79c0ff]'; // number
+    if (token.startsWith('"')) {
+      if (token.endsWith(':')) {
+        cls = 'text-[#0550ae] dark:text-[#79c0ff]'; // key
+      } else {
+        cls = 'text-[#116329] dark:text-[#a5d6ff]'; // string
+      }
+    } else if (/true|false/.test(token)) {
+      cls = 'text-[#8250df] dark:text-[#d2a8ff]'; // boolean
+    } else if (token === 'null') {
+      cls = 'text-[#cf222e] dark:text-[#ff7b72]'; // null
+    }
+
+    parts.push(
+      <span key={`t-${match.index}`} className={cls}>
+        {token}
+      </span>,
+    );
+    lastIndex = JSON_TOKEN_REGEX.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(
+      <span key={`p-${lastIndex}`} className="text-[#6e7781] dark:text-[#8b949e]">
+        {text.slice(lastIndex)}
+      </span>,
+    );
+  }
+
+  return <>{parts}</>;
+}
+
 function DemoApp() {
   const [savedConfig, setSavedConfig] = useState(initialConfig);
   const [draftConfig, setDraftConfig] = useState(initialConfig);
@@ -208,6 +260,21 @@ function DemoApp() {
     if (saved !== null) return saved === 'true';
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+
+  const [copied, setCopied] = useState(false);
+  const copyTimeoutRef = useRef(null);
+
+  const handleCopyJson = async () => {
+    const jsonText = JSON.stringify(draftConfig, null, 2);
+    try {
+      await navigator.clipboard.writeText(jsonText);
+      setCopied(true);
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // Fallback if clipboard API is unavailable
+    }
+  };
 
   const hasChanges = JSON.stringify(draftConfig) !== JSON.stringify(savedConfig);
 
@@ -397,18 +464,42 @@ function DemoApp() {
           style={{ width: `${rightWidthPct}%` }}
         >
           <div
-            className="min-h-0 p-4 overflow-auto"
+            className="min-h-0 p-4 flex flex-col"
             style={{ height: `${topHeightPct}%` }}
           >
-            <h3 className="mt-0 mb-1.5 text-[15px] font-semibold tracking-tight">
+            <h3 className="mt-0 mb-1.5 text-[15px] font-semibold tracking-tight flex-shrink-0">
               Generated JSON
             </h3>
-            <div className="text-[12px] text-[#3c3c43]/60 dark:text-[#ebebf5]/60 mb-2.5">
+            <div className="text-[12px] text-[#3c3c43]/60 dark:text-[#ebebf5]/60 mb-2.5 flex-shrink-0">
               Current path: <code className="text-[#007aff] dark:text-[#0a84ff]">{path || '/'}</code>
             </div>
-            <pre className="m-0 bg-white dark:bg-[#1c1c1e] border border-[#c6c6c8]/60 dark:border-[#38383a] rounded-xl p-3.5 text-[13px] overflow-auto">
-              {JSON.stringify(draftConfig, null, 2)}
-            </pre>
+            <div className="relative flex-1 min-h-0">
+              <pre className="m-0 h-full bg-white dark:bg-[#1c1c1e] border border-[#c6c6c8]/60 dark:border-[#38383a] rounded-xl p-3.5 pb-12 text-[13px] overflow-auto">
+                <HighlightedJson data={draftConfig} />
+              </pre>
+              <button
+                type="button"
+                onClick={handleCopyJson}
+                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium backdrop-blur-md bg-[#f2f2f7]/90 dark:bg-[#2c2c2e]/90 border border-[#c6c6c8]/60 dark:border-[#38383a] text-black dark:text-white shadow-sm hover:bg-[#e5e5ea] dark:hover:bg-[#3a3a3c] cursor-pointer transition-colors"
+              >
+                {copied ? (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34c759" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           <div
