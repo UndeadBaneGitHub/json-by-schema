@@ -529,20 +529,32 @@ function normalizeTypeArraySchema(schema) {
   };
 }
 
-export function deRefSchema(schema, rootSchema) {
+export function deRefSchema(schema, rootSchema, visited = new Set()) {
   if (!schema || !schema.$ref || !rootSchema) {
     return normalizeTypeArraySchema(schema);
   }
 
   const ref = schema.$ref;
+  if (visited.has(ref)) {
+    return normalizeTypeArraySchema({ ...schema, $ref: undefined });
+  }
+
+  const nextVisited = new Set(visited);
+  nextVisited.add(ref);
 
   const splitReference = ref.split('/').filter((item) => !!item);
   let resolvedRef = rootSchema;
   for (let i = 0; i < splitReference.length; i++) {
-    const refPart = splitReference[i];
+    const rawPart = splitReference[i];
 
-    if (refPart && refPart !== '#') {
-      const curRefPart = resolvedRef[refPart];
+    if (rawPart && rawPart !== '#') {
+      const refPart = decodeURIComponent(rawPart)
+        .replace(/~1/g, '/')
+        .replace(/~0/g, '~');
+      const curRefPart =
+        resolvedRef && typeof resolvedRef === 'object'
+          ? resolvedRef[refPart]
+          : undefined;
 
       if (!curRefPart) {
         resolvedRef = false;
@@ -554,6 +566,11 @@ export function deRefSchema(schema, rootSchema) {
   }
 
   resolvedRef = resolvedRef || {};
+  const merged = { ...schema, $ref: undefined, ...resolvedRef };
 
-  return normalizeTypeArraySchema({ ...schema, $ref: undefined, ...resolvedRef });
+  if (merged.$ref) {
+    return deRefSchema(merged, rootSchema, nextVisited);
+  }
+
+  return normalizeTypeArraySchema(merged);
 }
