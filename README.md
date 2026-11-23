@@ -13,7 +13,7 @@ A React 18 UI component for viewing, navigating, validating, and editing **JSON*
 ## Features
 
 - **Column-Miller Navigation**: Finder-style multi-pane drill-down for deeply nested objects, arrays, and polymorphic schemas (`oneOf`, `anyOf`, `allOf`, and `type` arrays).
-- **JSON & YAML Input/Output**: Pass `format="json"` or `format="yaml"` (or `mode="yaml"`) to work with objects or raw JSON/YAML strings, including an embedded CodeMirror 6 raw editor (`Edit as JSON` / `Edit as YAML`).
+- **JSON & YAML Input/Output**: Pass `format="json"` or `format="yaml"` to work with objects or raw JSON/YAML strings, including an embedded CodeMirror 6 raw editor (`Edit as JSON` / `Edit as YAML`).
 - **Built-in Theme Presets & Dark Mode**: Includes 5 design presets (`ios`, `nomad`, `github`, `kubernetes`, `swagger`) plus full custom CSS variable token overrides and light/dark mode support.
 - **Explicit Save & Unsaved Changes Guard**: Prevents accidental data loss when navigating away from modified fields.
 - **Drag-and-Drop Array Reordering**: Powered by `@dnd-kit`, with support for array of objects, primitives, and fixed positional tuple arrays.
@@ -102,7 +102,7 @@ export default function App() {
 | :--- | :--- | :--- | :--- |
 | `schema` | `object \| string` | **required** | JSON Schema object, or a JSON/YAML string representation of the schema. |
 | `config` | `object \| array \| string` | `{}` | Initial configuration object/array, or a JSON/YAML string. |
-| `format` (`mode`) | `'json' \| 'yaml'` | `'json'` | Active format for string parsing, `onChange` formatted string output, and the raw CodeMirror editor (`Edit as JSON` vs `Edit as YAML`). |
+| `format` | `'json' \| 'yaml'` | `'json'` | Active format for string parsing, `onChange` formatted string output, and the raw CodeMirror editor (`Edit as JSON` vs `Edit as YAML`). |
 | `onChange` | `(nextValue, delta, secondaryValue) => void` | `undefined` | Invoked when a property change is saved. If `config` was passed as an object, `nextValue` is the updated object and `secondaryValue` is the formatted JSON/YAML string. If `config` was passed as a string, `nextValue` is the formatted string and `secondaryValue` is the parsed object. |
 | `path` | `string` | `''` | Controlled navigation path (e.g. `'database/host'`). |
 | `onPathChange` | `(nextPath: string) => void` | `undefined` | Invoked when the user navigates to a different property column. |

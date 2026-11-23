@@ -145,10 +145,6 @@ export interface JsonBySchemaProps {
    * Input/output structured format ('json' | 'yaml'). Defaults to 'json'.
    */
   format?: StructuredFormat;
-  /**
-   * Alias for `format` ('json' | 'yaml').
-   */
-  mode?: StructuredFormat;
 }
 
 export declare const JsonBySchema: React.ComponentType<JsonBySchemaProps>;

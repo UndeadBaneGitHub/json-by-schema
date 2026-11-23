@@ -142,7 +142,7 @@ export class Editor extends React.PureComponent {
   }
 
   getResolvedFormat(props = this.props) {
-    return normalizeFormat(props.format || props.mode);
+    return normalizeFormat(props.format);
   }
 
   getResolvedSchema(props = this.props) {
@@ -317,7 +317,6 @@ Editor.propTypes = {
   ]).isRequired,
   schema: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
   format: PropTypes.oneOf(['json', 'yaml']),
-  mode: PropTypes.oneOf(['json', 'yaml']),
   initialize: PropTypes.func.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
   storedConfig: PropTypes.oneOfType([
