@@ -2,8 +2,11 @@ export const THEME_PRESETS = ['ios', 'nomad', 'github', 'kubernetes', 'swagger']
 
 export function resolveThemeProps(theme) {
   if (!theme || typeof theme !== 'string') {
-    return {};
+    return { className: 'jbs-theme-ios', 'data-jbs-theme': 'ios' };
   }
 
-  return { 'data-jbs-theme': theme };
+  return {
+    className: `jbs-theme-${theme}`,
+    'data-jbs-theme': theme,
+  };
 }

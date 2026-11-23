@@ -211,17 +211,22 @@ export class Editor extends React.PureComponent {
       name: '',
     };
 
-    const themeProps = resolveThemeProps(this.props.theme);
+    const { className: themeClassName, ...themeProps } = resolveThemeProps(
+      this.props.theme,
+    );
     const isControlled = this.props.darkMode !== undefined;
     const isDark = isControlled
       ? Boolean(this.props.darkMode)
       : this.state.internalDarkMode;
-    const baseRootClass = isDark
-      ? 'json-by-schema jbs-root dark'
-      : 'json-by-schema jbs-root';
-    const rootClassName = this.props.className
-      ? `${baseRootClass} ${this.props.className}`
-      : baseRootClass;
+    const rootClassName = [
+      'json-by-schema',
+      'jbs-root',
+      themeClassName,
+      isDark ? 'dark' : '',
+      this.props.className || '',
+    ]
+      .filter(Boolean)
+      .join(' ');
     const format = this.getResolvedFormat();
 
     return (

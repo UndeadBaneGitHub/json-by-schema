@@ -120,7 +120,10 @@ export default function App() {
 
 ### Available Semantic Classes
 
+All built-in component styles and theme presets are defined on these semantic classes in [`src/styles.css`](src/styles.css) using Tailwind's `@apply`:
+
 - `.json-by-schema`, `.jbs-root` — Root editor container (`.dark` is added when dark mode is active)
+- `.jbs-theme-ios`, `.jbs-theme-nomad`, `.jbs-theme-github`, `.jbs-theme-kubernetes`, `.jbs-theme-swagger` — Built-in theme preset classes applied to `.jbs-root`
 - `.jbs-panel`, `.jbs-panel--root`, `.jbs-panel--child`, `.jbs-panel--raw` — Column panel container
 - `.jbs-search-form`, `.jbs-search-input` — Property filter bar and input field
 - `.jbs-property-list` — Property list wrapper
