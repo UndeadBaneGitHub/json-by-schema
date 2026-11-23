@@ -1,0 +1,387 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Surfaces */
+  --jbs-bg: #ffffff;
+  --jbs-bg-secondary: #f2f2f7;
+  --jbs-bg-hover: #f2f2f7;
+  --jbs-bg-active: #e5e5ea;
+  --jbs-input-bg: rgba(118, 118, 128, 0.12);
+  --jbs-popover-bg: rgba(255, 255, 255, 0.96);
+
+  /* Typography */
+  --jbs-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --jbs-text: #000000;
+  --jbs-text-secondary: rgba(60, 60, 67, 0.6);
+  --jbs-text-muted: #8e8e93;
+
+  /* Borders & Shadows */
+  --jbs-border: rgba(60, 60, 67, 0.14);
+  --jbs-panel-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+
+  /* Accents & Status */
+  --jbs-accent: #007aff;
+  --jbs-accent-contrast: #ffffff;
+  --jbs-switch-on: #34c759;
+  --jbs-switch-off: #e9e9ea;
+  --jbs-danger: #ff3b30;
+  --jbs-danger-bg: rgba(255, 59, 48, 0.1);
+  --jbs-danger-border: rgba(255, 59, 48, 0.25);
+  --jbs-success: #1b7a34;
+  --jbs-success-bg: rgba(52, 199, 89, 0.18);
+  --jbs-warning: #ff9500;
+
+  /* Shape */
+  --jbs-radius: 10px;
+  --jbs-radius-lg: 12px;
+
+  /* Scrollbars */
+  --jbs-scroll-track: rgba(0, 0, 0, 0.04);
+  --jbs-scroll-thumb: rgba(0, 0, 0, 0.2);
+}
+
+.dark {
+  --jbs-bg: #1c1c1e;
+  --jbs-bg-secondary: #2c2c2e;
+  --jbs-bg-hover: rgba(44, 44, 46, 0.7);
+  --jbs-bg-active: #2c2c2e;
+  --jbs-input-bg: rgba(118, 118, 128, 0.24);
+  --jbs-popover-bg: rgba(44, 44, 46, 0.96);
+
+  --jbs-text: #ffffff;
+  --jbs-text-secondary: rgba(235, 235, 245, 0.6);
+  --jbs-text-muted: #8e8e93;
+
+  --jbs-border: rgba(84, 84, 88, 0.65);
+  --jbs-panel-shadow: 2px 0 18px rgba(0, 0, 0, 0.6);
+
+  --jbs-accent: #0a84ff;
+  --jbs-switch-on: #30d158;
+  --jbs-switch-off: #39393d;
+  --jbs-danger: #ff453a;
+  --jbs-danger-bg: rgba(255, 69, 58, 0.15);
+  --jbs-danger-border: rgba(255, 69, 58, 0.3);
+  --jbs-success: #6ee787;
+  --jbs-success-bg: rgba(48, 209, 88, 0.22);
+  --jbs-warning: #ff9f0a;
+
+  --jbs-scroll-track: rgba(255, 255, 255, 0.04);
+  --jbs-scroll-thumb: rgba(255, 255, 255, 0.22);
+}
+
+/* Built-in HashiCorp Nomad preset */
+[data-jbs-theme='nomad'] {
+  --jbs-bg: #ffffff;
+  --jbs-bg-secondary: #f7f8fa;
+  --jbs-bg-hover: #f1f3f5;
+  --jbs-bg-active: #e6f7f1;
+  --jbs-input-bg: #eef0f3;
+  --jbs-popover-bg: #ffffff;
+
+  --jbs-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --jbs-text: #1d1f23;
+  --jbs-text-secondary: #5a606a;
+  --jbs-text-muted: #818894;
+
+  --jbs-border: #dcdee2;
+  --jbs-panel-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+
+  --jbs-accent: #1d9d74;
+  --jbs-accent-contrast: #ffffff;
+  --jbs-switch-on: #00ca8e;
+  --jbs-switch-off: #cfd4dc;
+  --jbs-danger: #d93025;
+  --jbs-danger-bg: rgba(217, 48, 37, 0.08);
+  --jbs-danger-border: rgba(217, 48, 37, 0.25);
+
+  --jbs-radius: 4px;
+  --jbs-radius-lg: 6px;
+}
+
+.dark [data-jbs-theme='nomad'],
+[data-jbs-theme='nomad'].dark {
+  --jbs-bg: #1a1d21;
+  --jbs-bg-secondary: #121417;
+  --jbs-bg-hover: #24282e;
+  --jbs-bg-active: #14332a;
+  --jbs-input-bg: #24282e;
+  --jbs-popover-bg: #22262b;
+
+  --jbs-text: #eef0f3;
+  --jbs-text-secondary: #9aa2ad;
+  --jbs-text-muted: #707884;
+
+  --jbs-border: #2e333b;
+  --jbs-panel-shadow: 2px 0 16px rgba(0, 0, 0, 0.55);
+
+  --jbs-accent: #00ca8e;
+  --jbs-accent-contrast: #0b1914;
+  --jbs-switch-on: #00ca8e;
+  --jbs-switch-off: #343942;
+  --jbs-danger: #f25c54;
+  --jbs-danger-bg: rgba(242, 92, 84, 0.14);
+  --jbs-danger-border: rgba(242, 92, 84, 0.3);
+}
+
+/* GitHub / VS Code Developer preset */
+[data-jbs-theme='github'] {
+  --jbs-bg: #ffffff;
+  --jbs-bg-secondary: #f6f8fa;
+  --jbs-bg-hover: #f3f4f6;
+  --jbs-bg-active: #ddf4ff;
+  --jbs-input-bg: #f6f8fa;
+  --jbs-popover-bg: #ffffff;
+
+  --jbs-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  --jbs-text: #1f2328;
+  --jbs-text-secondary: #656d76;
+  --jbs-text-muted: #8c959f;
+
+  --jbs-border: #d0d7de;
+  --jbs-panel-shadow: 2px 0 8px rgba(31, 35, 40, 0.06);
+
+  --jbs-accent: #0969da;
+  --jbs-accent-contrast: #ffffff;
+  --jbs-switch-on: #1f883d;
+  --jbs-switch-off: #afb8c1;
+  --jbs-danger: #cf222e;
+  --jbs-danger-bg: rgba(207, 34, 46, 0.08);
+  --jbs-danger-border: rgba(207, 34, 46, 0.25);
+
+  --jbs-radius: 6px;
+  --jbs-radius-lg: 8px;
+}
+
+.dark [data-jbs-theme='github'],
+[data-jbs-theme='github'].dark {
+  --jbs-bg: #0d1117;
+  --jbs-bg-secondary: #161b22;
+  --jbs-bg-hover: #1c2128;
+  --jbs-bg-active: #12263f;
+  --jbs-input-bg: #21262d;
+  --jbs-popover-bg: #161b22;
+
+  --jbs-text: #e6edf3;
+  --jbs-text-secondary: #8b949e;
+  --jbs-text-muted: #6e7681;
+
+  --jbs-border: #30363d;
+  --jbs-panel-shadow: 2px 0 16px rgba(0, 0, 0, 0.65);
+
+  --jbs-accent: #2f81f7;
+  --jbs-accent-contrast: #ffffff;
+  --jbs-switch-on: #238636;
+  --jbs-switch-off: #30363d;
+  --jbs-danger: #f85149;
+  --jbs-danger-bg: rgba(248, 81, 73, 0.14);
+  --jbs-danger-border: rgba(248, 81, 73, 0.3);
+}
+
+/* Kubernetes / Cloud Native preset */
+[data-jbs-theme='kubernetes'] {
+  --jbs-bg: #ffffff;
+  --jbs-bg-secondary: #f4f6f9;
+  --jbs-bg-hover: #edf1f7;
+  --jbs-bg-active: #e6eeff;
+  --jbs-input-bg: #eef2f7;
+  --jbs-popover-bg: #ffffff;
+
+  --jbs-font-family: 'Roboto', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --jbs-text: #1c2536;
+  --jbs-text-secondary: #54637a;
+  --jbs-text-muted: #7b899e;
+
+  --jbs-border: #d5dce6;
+  --jbs-panel-shadow: 2px 0 10px rgba(28, 37, 54, 0.08);
+
+  --jbs-accent: #326ce5;
+  --jbs-accent-contrast: #ffffff;
+  --jbs-switch-on: #326ce5;
+  --jbs-switch-off: #c2ccd9;
+  --jbs-danger: #d93025;
+  --jbs-danger-bg: rgba(217, 48, 37, 0.08);
+  --jbs-danger-border: rgba(217, 48, 37, 0.25);
+
+  --jbs-radius: 4px;
+  --jbs-radius-lg: 6px;
+}
+
+.dark [data-jbs-theme='kubernetes'],
+[data-jbs-theme='kubernetes'].dark {
+  --jbs-bg: #141923;
+  --jbs-bg-secondary: #0f131b;
+  --jbs-bg-hover: #1c2331;
+  --jbs-bg-active: #1a2c4e;
+  --jbs-input-bg: #1e2636;
+  --jbs-popover-bg: #1a2130;
+
+  --jbs-text: #e8eef7;
+  --jbs-text-secondary: #94a3b8;
+  --jbs-text-muted: #64748b;
+
+  --jbs-border: #263145;
+  --jbs-panel-shadow: 2px 0 16px rgba(0, 0, 0, 0.6);
+
+  --jbs-accent: #4b83f2;
+  --jbs-accent-contrast: #ffffff;
+  --jbs-switch-on: #4b83f2;
+  --jbs-switch-off: #334155;
+  --jbs-danger: #f87171;
+  --jbs-danger-bg: rgba(248, 113, 113, 0.14);
+  --jbs-danger-border: rgba(248, 113, 113, 0.3);
+}
+
+/* Swagger / OpenAPI preset */
+[data-jbs-theme='swagger'] {
+  --jbs-bg: #ffffff;
+  --jbs-bg-secondary: #fafafa;
+  --jbs-bg-hover: #f2f4f7;
+  --jbs-bg-active: #eafaf1;
+  --jbs-input-bg: #f1f3f5;
+  --jbs-popover-bg: #ffffff;
+
+  --jbs-font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --jbs-text: #3b4151;
+  --jbs-text-secondary: #687082;
+  --jbs-text-muted: #8e96a8;
+
+  --jbs-border: #d8dde6;
+  --jbs-panel-shadow: 2px 0 8px rgba(59, 65, 81, 0.08);
+
+  --jbs-accent: #49cc90;
+  --jbs-accent-contrast: #1b2d24;
+  --jbs-switch-on: #49cc90;
+  --jbs-switch-off: #cbd2dd;
+  --jbs-danger: #f93e3e;
+  --jbs-danger-bg: rgba(249, 62, 62, 0.08);
+  --jbs-danger-border: rgba(249, 62, 62, 0.25);
+
+  --jbs-radius: 4px;
+  --jbs-radius-lg: 6px;
+}
+
+.dark [data-jbs-theme='swagger'],
+[data-jbs-theme='swagger'].dark {
+  --jbs-bg: #1e222a;
+  --jbs-bg-secondary: #171a21;
+  --jbs-bg-hover: #262b35;
+  --jbs-bg-active: #1b382d;
+  --jbs-input-bg: #282d38;
+  --jbs-popover-bg: #232832;
+
+  --jbs-text: #eef1f6;
+  --jbs-text-secondary: #9aa3b2;
+  --jbs-text-muted: #6c7586;
+
+  --jbs-border: #323846;
+  --jbs-panel-shadow: 2px 0 16px rgba(0, 0, 0, 0.55);
+
+  --jbs-accent: #49cc90;
+  --jbs-accent-contrast: #0e1d16;
+  --jbs-switch-on: #49cc90;
+  --jbs-switch-off: #3a4150;
+  --jbs-danger: #ff5c5c;
+  --jbs-danger-bg: rgba(255, 92, 92, 0.14);
+  --jbs-danger-border: rgba(255, 92, 92, 0.3);
+}
+
+.json-by-schema {
+  height: 100%;
+  width: 100%;
+  color: var(--jbs-text);
+  font-family: var(--jbs-font-family);
+  -webkit-font-smoothing: antialiased;
+}
+
+.json-by-schema p,
+.json-by-schema label {
+  font-family: inherit;
+  line-height: 1.45em;
+}
+
+.json-by-schema .clearfix::before,
+.json-by-schema .clearfix::after {
+  content: ' ';
+  display: table;
+}
+
+.json-by-schema .clearfix::after {
+  clear: both;
+}
+
+.json-by-schema .text-button {
+  padding: 0.4em 0.65em;
+  color: var(--jbs-accent);
+  font-size: 0.875rem;
+  font-weight: 500;
+  outline: none;
+  font-family: inherit;
+}
+
+.json-by-schema .text-button:focus {
+  text-decoration: underline;
+}
+
+.json-by-schema input,
+.json-by-schema textarea,
+.json-by-schema select {
+  font-family: inherit;
+}
+
+.json-by-schema .scroll-style::-webkit-scrollbar {
+  width: 8px;
+}
+
+.json-by-schema .scroll-style::-webkit-scrollbar-track {
+  background: var(--jbs-scroll-track);
+}
+
+.json-by-schema .scroll-style::-webkit-scrollbar-thumb {
+  background: var(--jbs-scroll-thumb);
+  border-radius: 4px;
+}
+
+.json-by-schema .hyphenate {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  hyphens: auto;
+}
+
+.json-by-schema .ellipses {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.json-by-schema .property-being-dragged {
+  border: 1px solid var(--jbs-accent);
+  border-radius: var(--jbs-radius);
+  z-index: 50;
+}
+
+@keyframes jbs-circle-fade-delay {
+  0%,
+  39%,
+  100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+.jbs-circle-dot::before {
+  content: '';
+  display: block;
+  margin: 0 auto;
+  width: 15%;
+  height: 15%;
+  background-color: var(--jbs-text-secondary);
+  border-radius: 100%;
+  animation: jbs-circle-fade-delay 1.2s infinite ease-in-out both;
+  animation-delay: var(--jbs-delay, 0s);
+}
