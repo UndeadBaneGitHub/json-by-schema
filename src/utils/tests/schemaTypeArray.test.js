@@ -8,6 +8,7 @@ import {
   getSelectedSchema,
   getSchemaForPropertyName,
   hasFilter,
+  deRefSchema,
 } from '../schemaUtils';
 import objectPanelReducer from '../../containers/ObjectPanel/reducer';
 import {
@@ -188,5 +189,52 @@ describe('formatUtils JSON and YAML helpers', () => {
       'integer',
       'null',
     ]);
+  });
+
+  it('recursively resolves chained $ref definitions with RFC 6901 pointer unescaping and cycle protection', () => {
+    const rootSchema = {
+      type: 'object',
+      definitions: {
+        basePort: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 65535,
+        },
+        aliasPort: {
+          $ref: '#/definitions/basePort',
+          description: 'Aliased port definition',
+        },
+        'nested/ ~key': {
+          $ref: '#/definitions/aliasPort',
+        },
+        cycleA: {
+          $ref: '#/definitions/cycleB',
+        },
+        cycleB: {
+          $ref: '#/definitions/cycleA',
+          type: 'string',
+        },
+      },
+      properties: {
+        port: {
+          $ref: '#/definitions/nested~1%20~0key',
+        },
+        cyclic: {
+          $ref: '#/definitions/cycleA',
+        },
+      },
+    };
+
+    const resolvedPort = getSchemaForPropertyName(rootSchema, 'port', rootSchema);
+    expect(resolvedPort).toEqual({
+      type: 'integer',
+      minimum: 1,
+      maximum: 65535,
+      description: 'Aliased port definition',
+    });
+
+    const resolvedCyclic = deRefSchema(rootSchema.properties.cyclic, rootSchema);
+    expect(resolvedCyclic.type).toBe('string');
+    expect(resolvedCyclic.$ref).toBeUndefined();
   });
 });

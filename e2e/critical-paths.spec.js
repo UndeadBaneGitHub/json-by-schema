@@ -23,6 +23,12 @@ test.describe('json-by-schema critical paths & visual checks', () => {
     await page.goto('/');
     await expect(page.getByText('serviceName').first()).toBeVisible();
     await expect(page.getByText('Generated JSON')).toBeVisible();
+    const githubLink = page.getByRole('link', { name: 'GitHub repository' });
+    await expect(githubLink).toBeVisible();
+    await expect(githubLink).toHaveAttribute(
+      'href',
+      'https://github.com/UndeadBaneGitHub/json-by-schema',
+    );
 
     // Ensure no horizontal overflow on desktop viewport
     const overflow = await page.evaluate(

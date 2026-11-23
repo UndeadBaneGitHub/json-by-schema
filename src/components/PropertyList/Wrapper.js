@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Wrapper = ({ className = '', ...rest }) => (
-  <div className={`relative w-full overflow-visible p-0 ${className}`} {...rest} />
+  <div className={`jbs-property-list ${className}`.trim()} {...rest} />
 );
 
 export default Wrapper;

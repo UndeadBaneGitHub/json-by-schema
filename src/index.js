@@ -43,7 +43,8 @@ function JsonBySchema(props) {
           deltaDepth={props.deltaDepth}
           theme={props.theme}
           darkMode={props.darkMode}
-          format={props.format || props.mode}
+          format={props.format}
+          className={props.className}
         />
       </IntlProvider>
     </Provider>
@@ -62,10 +63,10 @@ JsonBySchema.propTypes = {
   onPathChange: PropTypes.func,
   customValidators: PropTypes.arrayOf(PropTypes.func),
   deltaDepth: PropTypes.number,
-  theme: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  theme: PropTypes.string,
   darkMode: PropTypes.bool,
   format: PropTypes.oneOf(['json', 'yaml']),
-  mode: PropTypes.oneOf(['json', 'yaml']),
+  className: PropTypes.string,
 };
 
 export { JsonBySchema };

@@ -16,39 +16,55 @@ const jsxInJsPlugin = {
   },
 };
 
-export default defineConfig(({ command }) => ({
-  plugins: [tailwindcss(), jsxInJsPlugin, react()],
-  optimizeDeps: {
-    rolldownOptions: {
-      moduleTypes: {
-        '.js': 'jsx',
+export default defineConfig(({ command, mode }) => {
+  const isDemoBuild = command === 'build' && mode === 'demo';
+  const isLibBuild = command === 'build' && !isDemoBuild;
+
+  return {
+    base: isDemoBuild ? process.env.VITE_BASE_PATH || './' : '/',
+    plugins: [tailwindcss(), jsxInJsPlugin, react()],
+    optimizeDeps: {
+      rolldownOptions: {
+        moduleTypes: {
+          '.js': 'jsx',
+        },
       },
     },
-  },
-  ...(command === 'build'
-    ? {
-        build: {
-          lib: {
-            entry: 'src/index.js',
-            name: 'JsonBySchema',
-            fileName: (format) => (format === 'cjs' ? 'json-by-schema.cjs' : 'json-by-schema.js'),
-            formats: ['es', 'cjs'],
-          },
-          rollupOptions: {
-            external: ['react', 'react-dom', 'react/jsx-runtime'],
-            output: {
-              globals: {
-                react: 'React',
-                'react-dom': 'ReactDOM',
+    ...(isLibBuild
+      ? {
+          build: {
+            outDir: 'dist',
+            lib: {
+              entry: 'src/index.js',
+              name: 'JsonBySchema',
+              fileName: (format) =>
+                format === 'cjs' ? 'json-by-schema.cjs' : 'json-by-schema.js',
+              formats: ['es', 'cjs'],
+            },
+            rollupOptions: {
+              external: ['react', 'react-dom', 'react/jsx-runtime'],
+              output: {
+                globals: {
+                  react: 'React',
+                  'react-dom': 'ReactDOM',
+                },
               },
             },
           },
-        },
-      }
-    : {}),
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    exclude: ['e2e/**', 'node_modules/**'],
-  },
-}));
+        }
+      : {}),
+    ...(isDemoBuild
+      ? {
+          build: {
+            outDir: 'dist-demo',
+            emptyOutDir: true,
+          },
+        }
+      : {}),
+    test: {
+      environment: 'jsdom',
+      globals: true,
+      exclude: ['e2e/**', 'node_modules/**'],
+    },
+  };
+});

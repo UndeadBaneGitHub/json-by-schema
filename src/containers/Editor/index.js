@@ -142,7 +142,7 @@ export class Editor extends React.PureComponent {
   }
 
   getResolvedFormat(props = this.props) {
-    return normalizeFormat(props.format || props.mode);
+    return normalizeFormat(props.format);
   }
 
   getResolvedSchema(props = this.props) {
@@ -211,12 +211,22 @@ export class Editor extends React.PureComponent {
       name: '',
     };
 
-    const themeProps = resolveThemeProps(this.props.theme);
+    const { className: themeClassName, ...themeProps } = resolveThemeProps(
+      this.props.theme,
+    );
     const isControlled = this.props.darkMode !== undefined;
     const isDark = isControlled
       ? Boolean(this.props.darkMode)
       : this.state.internalDarkMode;
-    const rootClassName = isDark ? 'json-by-schema dark' : 'json-by-schema';
+    const rootClassName = [
+      'json-by-schema',
+      'jbs-root',
+      themeClassName,
+      isDark ? 'dark' : '',
+      this.props.className || '',
+    ]
+      .filter(Boolean)
+      .join(' ');
     const format = this.getResolvedFormat();
 
     return (
@@ -317,7 +327,6 @@ Editor.propTypes = {
   ]).isRequired,
   schema: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
   format: PropTypes.oneOf(['json', 'yaml']),
-  mode: PropTypes.oneOf(['json', 'yaml']),
   initialize: PropTypes.func.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
   storedConfig: PropTypes.oneOfType([
@@ -338,8 +347,9 @@ Editor.propTypes = {
   path: PropTypes.string,
   internalPath: PropTypes.string.isRequired,
   updatePath: PropTypes.func.isRequired,
-  theme: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  theme: PropTypes.string,
   darkMode: PropTypes.bool,
+  className: PropTypes.string,
 };
 
 const mapStateToProps = createStructuredSelector({
