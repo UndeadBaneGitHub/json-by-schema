@@ -2,48 +2,12 @@ import * as React from 'react';
 
 export type ThemePreset =
   | 'ios'
-  | 'material'
-  | 'antd'
-  | 'fluent'
-  | 'bootstrap'
-  | 'linear'
-  | 'kubernetes'
-  | 'swagger'
   | 'nomad'
-  | 'github';
+  | 'github'
+  | 'kubernetes'
+  | 'swagger';
 
 export type StructuredFormat = 'json' | 'yaml';
-
-export interface ThemeTokens {
-  preset?: ThemePreset | string;
-  bg?: string;
-  bgSecondary?: string;
-  bgHover?: string;
-  bgActive?: string;
-  inputBg?: string;
-  popoverBg?: string;
-  text?: string;
-  textSecondary?: string;
-  textMuted?: string;
-  border?: string;
-  panelShadow?: string;
-  accent?: string;
-  accentContrast?: string;
-  switchOn?: string;
-  switchOff?: string;
-  danger?: string;
-  dangerBg?: string;
-  dangerBorder?: string;
-  success?: string;
-  successBg?: string;
-  warning?: string;
-  radius?: string;
-  radiusLg?: string;
-  fontFamily?: string;
-  scrollTrack?: string;
-  scrollThumb?: string;
-  [cssVariable: `--${string}`]: string | undefined;
-}
 
 export interface CustomValidationErrorOptions {
   name: string;
@@ -134,9 +98,9 @@ export interface JsonBySchemaProps {
    */
   deltaDepth?: number;
   /**
-   * Theme preset name or custom CSS token overrides.
+   * Theme preset name ('ios' | 'nomad' | 'github' | 'kubernetes' | 'swagger').
    */
-  theme?: ThemePreset | ThemeTokens | string;
+  theme?: ThemePreset | string;
   /**
    * Controlled dark mode state. If omitted, an internal dark mode toggle is rendered.
    */
@@ -145,6 +109,10 @@ export interface JsonBySchemaProps {
    * Input/output structured format ('json' | 'yaml'). Defaults to 'json'.
    */
   format?: StructuredFormat;
+  /**
+   * Additional CSS class name applied to the root `.json-by-schema` container.
+   */
+  className?: string;
 }
 
 export declare const JsonBySchema: React.ComponentType<JsonBySchemaProps>;

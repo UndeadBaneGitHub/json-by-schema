@@ -29,9 +29,19 @@ const ListItemInnerWrapper = ({
       : 'border-l-[3px] border-l-[var(--jbs-accent)]'
     : '';
 
+  const stateClasses = [
+    'jbs-property-item-inner',
+    expanded ? 'jbs-property-item-inner--active' : '',
+    invalid ? 'jbs-property-item-inner--invalid' : '',
+    empty ? 'jbs-property-item-inner--empty' : '',
+    changed ? 'jbs-property-item-inner--changed' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
     <div
-      className={`w-full h-full m-0 px-4 py-3 leading-normal text-left cursor-inherit transition-colors ${bgClass} ${opacityClass} ${borderClass} ${className}`}
+      className={`${stateClasses} w-full h-full m-0 px-4 py-3 leading-normal text-left cursor-inherit transition-colors ${bgClass} ${opacityClass} ${borderClass} ${className}`.trim()}
       style={{
         ...(changed
           ? {

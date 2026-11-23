@@ -216,7 +216,12 @@ export class Editor extends React.PureComponent {
     const isDark = isControlled
       ? Boolean(this.props.darkMode)
       : this.state.internalDarkMode;
-    const rootClassName = isDark ? 'json-by-schema dark' : 'json-by-schema';
+    const baseRootClass = isDark
+      ? 'json-by-schema jbs-root dark'
+      : 'json-by-schema jbs-root';
+    const rootClassName = this.props.className
+      ? `${baseRootClass} ${this.props.className}`
+      : baseRootClass;
     const format = this.getResolvedFormat();
 
     return (
@@ -337,8 +342,9 @@ Editor.propTypes = {
   path: PropTypes.string,
   internalPath: PropTypes.string.isRequired,
   updatePath: PropTypes.func.isRequired,
-  theme: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  theme: PropTypes.string,
   darkMode: PropTypes.bool,
+  className: PropTypes.string,
 };
 
 const mapStateToProps = createStructuredSelector({

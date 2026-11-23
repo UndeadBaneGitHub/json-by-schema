@@ -15,7 +15,7 @@ function Combobox({
   const selectedOption = options.find((opt) => opt.value === value) || null;
 
   return (
-    <div ref={containerRef} className={`relative w-full ${className}`}>
+    <div ref={containerRef} className={`jbs-combobox relative w-full ${className}`.trim()}>
       <BaseCombobox.Root
         items={options}
         value={selectedOption}
