@@ -1017,6 +1017,7 @@ export class ObjectPanel extends React.Component {
           <EditAsJSONButton
             showStop={editAsJSON}
             onClick={this.handleEditAsJSONClick}
+            format={this.context && this.context.format}
           />
         </EditAsJSONButtonWrapper>
       </Wrapper>

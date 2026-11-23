@@ -500,11 +500,23 @@ export function hasFilter(filter, title, name, config, schema) {
 }
 
 function normalizeTypeArraySchema(schema) {
-  if (!schema || !Array.isArray(schema.type)) {
+  if (!schema) {
     return schema;
   }
 
-  const { type: types, ...rest } = schema;
+  if (schema.type === null) {
+    return {
+      ...schema,
+      type: 'null',
+    };
+  }
+
+  if (!Array.isArray(schema.type)) {
+    return schema;
+  }
+
+  const { type: rawTypes, ...rest } = schema;
+  const types = rawTypes.map((t) => (t === null ? 'null' : String(t)));
   const allowsNull = types.includes('null') && types.length > 1;
   return {
     ...rest,

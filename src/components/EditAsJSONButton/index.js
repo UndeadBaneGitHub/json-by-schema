@@ -15,6 +15,8 @@ function EditAsJSONButton(props) {
     return null;
   }
 
+  const isYaml = props.format === 'yaml';
+
   return (
     <Wrapper
       onClick={props.onClick}
@@ -22,7 +24,13 @@ function EditAsJSONButton(props) {
       className={'text-button'}
     >
       {props.showStop ? (
-        <FormattedMessage {...messages.stopEditAsJSON} />
+        isYaml ? (
+          'Stop editing as YAML'
+        ) : (
+          <FormattedMessage {...messages.stopEditAsJSON} />
+        )
+      ) : isYaml ? (
+        'Edit as YAML'
       ) : (
         <FormattedMessage {...messages.editAsJSON} />
       )}
@@ -35,6 +43,7 @@ EditAsJSONButton.propTypes = {
   hide: PropTypes.bool,
   disabled: PropTypes.bool,
   showStop: PropTypes.bool.isRequired,
+  format: PropTypes.oneOf(['json', 'yaml']),
 };
 
 export default EditAsJSONButton;

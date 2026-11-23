@@ -21,6 +21,10 @@ import {
   setValueType,
   validateConfig,
 } from '../../utils/schemaUtils';
+import {
+  parseStructuredValue,
+  stringifyStructuredValue,
+} from '../../utils/formatUtils';
 
 import ValueEditor from '../../components/ValueEditor';
 import ErrorMessage from '../../components/ErrorMessage';
@@ -70,7 +74,10 @@ export class PropertyEditor extends React.PureComponent {
         this.props.jsonEditor ||
         ['object', 'array'].includes(this.props.schema.type)
       ) {
-        return JSON.stringify(config, null, 2);
+        return stringifyStructuredValue(
+          config,
+          this.context && this.context.format,
+        );
       }
       return config === undefined || config === null ? '' : String(config);
     };
@@ -107,7 +114,12 @@ export class PropertyEditor extends React.PureComponent {
         evt.target.value === null && this.props.schema.allowsNull;
       const nextValue = isExplicitNull
         ? null
-        : processInputValue(evt.target.value, this.props.schema.type);
+        : processInputValue(
+            evt.target.value,
+            this.props.schema.type,
+            this.context && this.context.format,
+            this.props.jsonEditor,
+          );
       const nextStrValue = isExplicitNull
         ? ''
         : evt.target.strValue !== undefined
@@ -161,6 +173,7 @@ export class PropertyEditor extends React.PureComponent {
 
   componentDidMount() {
     this.userModified = false;
+    this.prevFormat = this.context && this.context.format;
     const initialVal = this.getInitialEditorValue(
       this.props.config,
       this.props.schema,
@@ -177,10 +190,15 @@ export class PropertyEditor extends React.PureComponent {
   }
 
   componentDidUpdate(prevProps) {
+    const currentFormat = this.context && this.context.format;
+    const formatChanged = this.prevFormat !== currentFormat;
+    this.prevFormat = currentFormat;
+
     if (
       prevProps.path !== this.props.path ||
       prevProps.schema !== this.props.schema ||
-      prevProps.config !== this.props.config
+      prevProps.config !== this.props.config ||
+      (formatChanged && !this.userModified)
     ) {
       this.userModified = false;
       const initialVal = this.getInitialEditorValue(
@@ -196,6 +214,12 @@ export class PropertyEditor extends React.PureComponent {
         this.context.setUnsavedState(false, null);
       }
       scrollPanelIntoView(this.panelRef);
+    } else if (formatChanged && this.userModified) {
+      this.props.changeNewPropertyValue(
+        this.props.newValue,
+        this.getConfigString(this.props.newValue),
+        this.props.path,
+      );
     } else {
       this.syncUnsavedState();
     }
@@ -341,6 +365,7 @@ export class PropertyEditor extends React.PureComponent {
             multipleOf={this.props.schema.multipleOf}
             allowsNull={Boolean(this.props.schema.allowsNull)}
             jsonEditor={this.props.jsonEditor}
+            format={(this.context && this.context.format) || 'json'}
             onChange={this.onChange}
             onSubmit={this.onSubmit}
             onRevert={this.onRevert}
@@ -397,12 +422,12 @@ PropertyEditor.propTypes = {
 };
 
 // TODO: Consider moving to the editor component
-const processInputValue = (val, type) => {
+const processInputValue = (val, type, format, isRawEditor) => {
   let newVal = val;
 
-  if (['object', 'array'].includes(type)) {
+  if (isRawEditor || ['object', 'array'].includes(type)) {
     try {
-      newVal = JSON.parse(newVal);
+      newVal = parseStructuredValue(newVal, format);
     } catch (ex) {
       // do nothing
     }

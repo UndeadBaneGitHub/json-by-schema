@@ -10,6 +10,7 @@ import { injectIntl } from 'react-intl';
 
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
+import { yaml } from '@codemirror/lang-yaml';
 
 import { Switch } from '@base-ui/react/switch';
 import { Slider } from '@base-ui/react/slider';
@@ -78,7 +79,7 @@ getSelect.propTypes = {
   onKeyDown: PropTypes.func.isRequired,
 };
 
-function JsonAceEditor({ strValue, onChange }) {
+function JsonAceEditor({ strValue, onChange, format }) {
   const containerRef = useRef(null);
   const [isDark, setIsDark] = useState(
     () =>
@@ -116,7 +117,7 @@ function JsonAceEditor({ strValue, onChange }) {
         value={strValue || ''}
         height="450px"
         theme={isDark ? 'dark' : 'light'}
-        extensions={[json()]}
+        extensions={[format === 'yaml' ? yaml() : json()]}
         onChange={onJsonEditorChange(onChange)}
         basicSetup={{
           lineNumbers: true,
@@ -132,6 +133,7 @@ function JsonAceEditor({ strValue, onChange }) {
 JsonAceEditor.propTypes = {
   strValue: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+  format: PropTypes.oneOf(['json', 'yaml']),
 };
 
 function SetToNullButton({ isNull, onSetNull, className = '' }) {
@@ -175,7 +177,13 @@ function getEditor(props) {
       : undefined;
 
   if (props.jsonEditor) {
-    return <JsonAceEditor strValue={props.strValue} onChange={props.onChange} />;
+    return (
+      <JsonAceEditor
+        strValue={props.strValue}
+        onChange={props.onChange}
+        format={props.format}
+      />
+    );
   }
   if (props.enum) {
     const options = props.enum.map((value) => ({
@@ -351,6 +359,7 @@ getEditor.propTypes = {
   allowsNull: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   jsonEditor: PropTypes.bool,
+  format: PropTypes.oneOf(['json', 'yaml']),
 };
 
 function ValueEditor(props) {

@@ -2,8 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
+import { yaml } from '@codemirror/lang-yaml';
+import { Select } from '@base-ui/react/select';
 import { Switch } from '@base-ui/react/switch';
-import { JsonBySchema, THEME_PRESETS } from '../src';
+import {
+  JsonBySchema,
+  THEME_PRESETS,
+  SUPPORTED_FORMATS,
+  parseStructuredValue,
+  stringifyStructuredValue,
+} from '../src';
 
 const sampleSchema = {
   $schema: 'http://json-schema.org/draft-04/schema#',
@@ -200,10 +208,21 @@ const PRESET_LABELS = {
   swagger: 'Swagger',
 };
 
+const FORMAT_LABELS = {
+  json: 'JSON',
+  yaml: 'YAML',
+};
+
 function DemoApp() {
+  const [mode, setMode] = useState(
+    () => localStorage.getItem('jbs-format-mode') || 'json',
+  );
   const [activeSchema, setActiveSchema] = useState(sampleSchema);
   const [schemaText, setSchemaText] = useState(() =>
-    JSON.stringify(sampleSchema, null, 2),
+    stringifyStructuredValue(
+      sampleSchema,
+      localStorage.getItem('jbs-format-mode') || 'json',
+    ),
   );
   const [schemaError, setSchemaError] = useState(null);
   const [savedConfig, setSavedConfig] = useState(initialConfig);
@@ -225,10 +244,18 @@ function DemoApp() {
   const [copied, setCopied] = useState(false);
   const copyTimeoutRef = useRef(null);
 
+  const handleModeChange = (nextMode) => {
+    if (!nextMode || nextMode === mode) return;
+    setMode(nextMode);
+    localStorage.setItem('jbs-format-mode', nextMode);
+    setSchemaError(null);
+    setSchemaText(stringifyStructuredValue(activeSchema, nextMode));
+  };
+
   const handleCopyJson = async () => {
-    const jsonText = JSON.stringify(draftConfig, null, 2);
+    const formattedText = stringifyStructuredValue(draftConfig, mode);
     try {
-      await navigator.clipboard.writeText(jsonText);
+      await navigator.clipboard.writeText(formattedText);
       setCopied(true);
       if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
       copyTimeoutRef.current = setTimeout(() => setCopied(false), 1800);
@@ -237,14 +264,17 @@ function DemoApp() {
     }
   };
 
-  const isSchemaDirty = schemaText !== JSON.stringify(activeSchema, null, 2);
+  const isSchemaDirty =
+    schemaText !== stringifyStructuredValue(activeSchema, mode);
 
   const handleSchemaTextChange = (nextText) => {
     setSchemaText(nextText);
     try {
-      const parsed = JSON.parse(nextText);
+      const parsed = parseStructuredValue(nextText, mode);
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        setSchemaError('Schema must be a JSON object');
+        setSchemaError(
+          `Schema must be a ${mode.toUpperCase()} object`,
+        );
       } else {
         setSchemaError(null);
       }
@@ -255,14 +285,16 @@ function DemoApp() {
 
   const handleUpdateSchema = () => {
     try {
-      const parsed = JSON.parse(schemaText);
+      const parsed = parseStructuredValue(schemaText, mode);
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        setSchemaError('Schema must be a JSON object');
+        setSchemaError(
+          `Schema must be a ${mode.toUpperCase()} object`,
+        );
         return;
       }
       setSchemaError(null);
       setActiveSchema(parsed);
-      setSchemaText(JSON.stringify(parsed, null, 2));
+      setSchemaText(stringifyStructuredValue(parsed, mode));
       runWithLoadingOverlay(() => {
         setSavedConfig(draftConfig);
         setPath('');
@@ -317,7 +349,7 @@ function DemoApp() {
       edit: (name) => {
         if (name === 'demo-output-json') {
           return {
-            getValue: () => JSON.stringify(draftConfig, null, 2),
+            getValue: () => stringifyStructuredValue(draftConfig, mode),
           };
         }
         if (name === 'demo-schema-editor') {
@@ -329,7 +361,7 @@ function DemoApp() {
         return null;
       },
     };
-  }, [draftConfig, schemaText]);
+  }, [draftConfig, schemaText, mode]);
 
   useEffect(() => {
     if (!dragging) return undefined;
@@ -365,10 +397,37 @@ function DemoApp() {
     >
       {/* Top Bar */}
       <header className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 bg-white dark:bg-[#1c1c1e] border-b border-[#c6c6c8]/60 dark:border-[#38383a] flex-shrink-0">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <span className="text-[15px] font-semibold tracking-tight">
             json-by-schema
           </span>
+          <div className="w-px h-5 bg-black/10 dark:bg-white/15" />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={!hasChanges}
+              onClick={handleGlobalRevert}
+              className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors ${
+                hasChanges
+                  ? 'border-[#c6c6c8] dark:border-[#38383a] text-black dark:text-white hover:bg-[#f2f2f7] dark:hover:bg-[#2c2c2e] cursor-pointer'
+                  : 'border-transparent text-[#8e8e93] opacity-50 cursor-not-allowed'
+              }`}
+            >
+              Revert changes
+            </button>
+            <button
+              type="button"
+              disabled={!hasChanges}
+              onClick={handleGlobalSave}
+              className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-opacity ${
+                hasChanges
+                  ? 'bg-[#007aff] dark:bg-[#0a84ff] text-white cursor-pointer hover:opacity-90'
+                  : 'bg-[#8e8e93]/20 text-[#8e8e93] cursor-not-allowed'
+              }`}
+            >
+              Save
+            </button>
+          </div>
           {hasChanges && (
             <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#ff9500]/15 text-[#c97600] dark:bg-[#ff9f0a]/20 dark:text-[#ffb340]">
               Unsaved changes
@@ -377,21 +436,100 @@ function DemoApp() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center rounded-full bg-[#767680]/15 dark:bg-[#767680]/25 p-0.5">
-            {THEME_PRESETS.map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                onClick={() => setThemePreset(preset)}
-                className={`px-2.5 py-1 rounded-full text-[12px] font-medium capitalize transition-colors cursor-pointer ${
-                  themePreset === preset
-                    ? 'bg-white dark:bg-[#3a3a3c] text-black dark:text-white shadow-sm'
-                    : 'text-[#3c3c43]/70 dark:text-[#ebebf5]/60 hover:text-black dark:hover:text-white'
-                }`}
+          <div className="flex items-center gap-2">
+            <span className="text-[12px] font-medium text-[#3c3c43]/80 dark:text-[#ebebf5]/70">
+              Style
+            </span>
+            <Select.Root
+              items={PRESET_LABELS}
+              value={themePreset}
+              onValueChange={(nextPreset) => {
+                if (nextPreset) setThemePreset(nextPreset);
+              }}
+            >
+              <Select.Trigger
+                aria-label="Style"
+                className="inline-flex items-center justify-between gap-2 min-w-[110px] px-3 py-1 rounded-lg text-[12px] font-medium bg-[#767680]/15 dark:bg-[#767680]/25 text-black dark:text-white hover:bg-[#767680]/22 dark:hover:bg-[#767680]/35 transition-colors cursor-pointer outline-none"
               >
-                {PRESET_LABELS[preset] || preset}
-              </button>
-            ))}
+                <Select.Value />
+                <Select.Icon className="text-[#3c3c43]/70 dark:text-[#ebebf5]/60 flex items-center">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </Select.Icon>
+              </Select.Trigger>
+              <Select.Portal>
+                <Select.Positioner sideOffset={6} className="z-[110]">
+                  <Select.Popup className="min-w-[130px] p-1 rounded-xl bg-white/95 dark:bg-[#2c2c2e]/95 backdrop-blur-md border border-[#c6c6c8]/60 dark:border-[#38383a] shadow-xl outline-none">
+                    <Select.List>
+                      {THEME_PRESETS.map((preset) => (
+                        <Select.Item
+                          key={preset}
+                          value={preset}
+                          className="relative flex items-center pl-7 pr-3 py-1.5 rounded-lg text-[13px] font-medium text-black dark:text-white select-none cursor-pointer outline-none data-[highlighted]:bg-[#007aff] dark:data-[highlighted]:bg-[#0a84ff] data-[highlighted]:text-white"
+                        >
+                          <Select.ItemIndicator className="absolute left-2 inline-flex items-center">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </Select.ItemIndicator>
+                          <Select.ItemText>
+                            {PRESET_LABELS[preset] || preset}
+                          </Select.ItemText>
+                        </Select.Item>
+                      ))}
+                    </Select.List>
+                  </Select.Popup>
+                </Select.Positioner>
+              </Select.Portal>
+            </Select.Root>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[12px] font-medium text-[#3c3c43]/80 dark:text-[#ebebf5]/70">
+              Mode
+            </span>
+            <Select.Root
+              items={FORMAT_LABELS}
+              value={mode}
+              onValueChange={handleModeChange}
+            >
+              <Select.Trigger
+                aria-label="Mode"
+                className="inline-flex items-center justify-between gap-2 min-w-[85px] px-3 py-1 rounded-lg text-[12px] font-medium bg-[#767680]/15 dark:bg-[#767680]/25 text-black dark:text-white hover:bg-[#767680]/22 dark:hover:bg-[#767680]/35 transition-colors cursor-pointer outline-none"
+              >
+                <Select.Value />
+                <Select.Icon className="text-[#3c3c43]/70 dark:text-[#ebebf5]/60 flex items-center">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </Select.Icon>
+              </Select.Trigger>
+              <Select.Portal>
+                <Select.Positioner sideOffset={6} className="z-[110]">
+                  <Select.Popup className="min-w-[110px] p-1 rounded-xl bg-white/95 dark:bg-[#2c2c2e]/95 backdrop-blur-md border border-[#c6c6c8]/60 dark:border-[#38383a] shadow-xl outline-none">
+                    <Select.List>
+                      {SUPPORTED_FORMATS.map((fmt) => (
+                        <Select.Item
+                          key={fmt}
+                          value={fmt}
+                          className="relative flex items-center pl-7 pr-3 py-1.5 rounded-lg text-[13px] font-medium text-black dark:text-white select-none cursor-pointer outline-none data-[highlighted]:bg-[#007aff] dark:data-[highlighted]:bg-[#0a84ff] data-[highlighted]:text-white"
+                        >
+                          <Select.ItemIndicator className="absolute left-2 inline-flex items-center">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </Select.ItemIndicator>
+                          <Select.ItemText>
+                            {FORMAT_LABELS[fmt] || fmt}
+                          </Select.ItemText>
+                        </Select.Item>
+                      ))}
+                    </Select.List>
+                  </Select.Popup>
+                </Select.Positioner>
+              </Select.Portal>
+            </Select.Root>
           </div>
 
           <div className="w-px h-5 bg-black/10 dark:bg-white/15" />
@@ -431,35 +569,6 @@ function DemoApp() {
               />
             </Switch.Root>
           </div>
-
-          <div className="w-px h-5 bg-black/10 dark:bg-white/15" />
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={!hasChanges}
-              onClick={handleGlobalRevert}
-              className={`px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors ${
-                hasChanges
-                  ? 'border-[#c6c6c8] dark:border-[#38383a] text-black dark:text-white hover:bg-[#f2f2f7] dark:hover:bg-[#2c2c2e] cursor-pointer'
-                  : 'border-transparent text-[#8e8e93] opacity-50 cursor-not-allowed'
-              }`}
-            >
-              Revert changes
-            </button>
-            <button
-              type="button"
-              disabled={!hasChanges}
-              onClick={handleGlobalSave}
-              className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-opacity ${
-                hasChanges
-                  ? 'bg-[#007aff] dark:bg-[#0a84ff] text-white cursor-pointer hover:opacity-90'
-                  : 'bg-[#8e8e93]/20 text-[#8e8e93] cursor-not-allowed'
-              }`}
-            >
-              Save
-            </button>
-          </div>
         </div>
       </header>
 
@@ -472,6 +581,7 @@ function DemoApp() {
             path={path}
             theme={themePreset}
             darkMode={darkMode}
+            format={mode}
             onChange={(nextConfig) => setDraftConfig(nextConfig)}
             onPathChange={(nextPath) => setPath(nextPath)}
           />
@@ -498,16 +608,16 @@ function DemoApp() {
             style={{ height: `${topHeightPct}%` }}
           >
             <h3 className="mt-0 mb-1.5 text-[15px] font-semibold tracking-tight flex-shrink-0">
-              Generated JSON
+              {mode === 'yaml' ? 'Generated YAML' : 'Generated JSON'}
             </h3>
             <div className="text-[12px] text-[#3c3c43]/60 dark:text-[#ebebf5]/60 mb-2.5 flex-shrink-0">
               Current path: <code className="text-[#007aff] dark:text-[#0a84ff]">{path || '/'}</code>
             </div>
             <div className="relative flex-1 min-h-0 rounded-xl overflow-auto border border-[#c6c6c8]/60 dark:border-[#38383a] bg-white dark:bg-[#1d1f21]">
               <CodeMirror
-                value={JSON.stringify(draftConfig, null, 2)}
+                value={stringifyStructuredValue(draftConfig, mode)}
                 theme={darkMode ? 'dark' : 'light'}
-                extensions={[json()]}
+                extensions={[mode === 'yaml' ? yaml() : json()]}
                 editable={false}
                 readOnly
                 height="100%"
@@ -558,7 +668,7 @@ function DemoApp() {
           <div className="flex-1 min-h-0 p-4 flex flex-col">
             <div className="flex items-center justify-between mb-2.5 flex-shrink-0">
               <h3 className="m-0 text-[15px] font-semibold tracking-tight">
-                JSON Schema
+                {mode === 'yaml' ? 'YAML Schema' : 'JSON Schema'}
               </h3>
               {schemaError && (
                 <span className="text-[11px] font-medium text-[#ff3b30] dark:text-[#ff453a] truncate max-w-[65%]">
@@ -571,7 +681,7 @@ function DemoApp() {
                 value={schemaText}
                 onChange={handleSchemaTextChange}
                 theme={darkMode ? 'dark' : 'light'}
-                extensions={[json()]}
+                extensions={[mode === 'yaml' ? yaml() : json()]}
                 height="100%"
                 className="h-full text-[13px]"
                 basicSetup={{

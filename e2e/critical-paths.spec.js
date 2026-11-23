@@ -39,11 +39,14 @@ test.describe('json-by-schema critical paths & visual checks', () => {
     await expect(page.locator('html')).toHaveClass(/dark/);
     await expect(page).toHaveScreenshot('demo-ios-dark.png');
 
-    // Switch back to light mode and test theme preset switching
+    // Switch back to light mode and test Style dropdown preset switching
     await darkSwitch.click();
     await expect(page.locator('html')).not.toHaveClass(/dark/);
-    await page.getByRole('button', { name: 'Nomad' }).click();
-    await page.getByRole('button', { name: 'iOS' }).click();
+    const styleTrigger = page.getByRole('combobox', { name: 'Style' });
+    await styleTrigger.click();
+    await page.getByRole('option', { name: 'Nomad' }).click();
+    await styleTrigger.click();
+    await page.getByRole('option', { name: 'iOS' }).click();
 
     expect(errors).toEqual([]);
   });
@@ -80,7 +83,7 @@ test.describe('json-by-schema critical paths & visual checks', () => {
     await page.locator('input[type="submit"][value="Save"]').click();
 
     // 3. Verify "null" is disabled in One of dropdown, pick "string", set "KAPPA", Save
-    const oneOfInput = page.getByRole('combobox').first();
+    const oneOfInput = page.locator('.json-by-schema [role="combobox"]').first();
     await oneOfInput.click();
     const nullOption = page.getByRole('option', { name: 'null' });
     await expect(nullOption).toHaveAttribute('aria-disabled', 'true');
@@ -107,7 +110,7 @@ test.describe('json-by-schema critical paths & visual checks', () => {
     await expect(kappaTextarea).toHaveValue('');
     await expect(kappaTextarea).toHaveAttribute('placeholder', 'null');
 
-    await page.getByRole('combobox').first().click();
+    await page.locator('.json-by-schema [role="combobox"]').first().click();
     await page.getByRole('option', { name: 'integer' }).click();
 
     const numInput = page.locator('.json-by-schema input[type="number"]').first();
@@ -116,7 +119,7 @@ test.describe('json-by-schema critical paths & visual checks', () => {
     await page.locator('input[type="submit"][value="Save"]').click();
 
     // 7. Switch back to "string": 123 should be placeholder with no type-mismatch validation error
-    await page.getByRole('combobox').first().click();
+    await page.locator('.json-by-schema [role="combobox"]').first().click();
     await page.getByRole('option', { name: 'string' }).click();
     const backToStringTa = page.locator('.json-by-schema textarea').first();
     await expect(backToStringTa).toHaveValue('');
@@ -124,7 +127,7 @@ test.describe('json-by-schema critical paths & visual checks', () => {
     await expect(page.getByText(/is not of a type/i)).toHaveCount(0);
 
     // 8. Switch to "boolean" while config is 123: shows "True", Save is enabled, and clicking Save updates JSON to true
-    await page.getByRole('combobox').first().click();
+    await page.locator('.json-by-schema [role="combobox"]').first().click();
     await page.getByRole('option', { name: 'boolean' }).click();
     const boolSwitch = page.locator('.json-by-schema [role="switch"]').first();
     await expect(boolSwitch).toHaveAttribute('aria-checked', 'true');
@@ -201,7 +204,7 @@ test.describe('json-by-schema critical paths & visual checks', () => {
 
     // 3. Navigate into anyOf property (notificationTarget), switch branch to Webhook object, edit nested child
     await clickPropertyItem(page, 'notificationTarget');
-    const anyOfCombo = page.getByRole('combobox').first();
+    const anyOfCombo = page.locator('.json-by-schema [role="combobox"]').first();
     await anyOfCombo.click();
     await page.getByRole('option', { name: 'Webhook' }).click();
 
@@ -523,5 +526,65 @@ test.describe('json-by-schema critical paths & visual checks', () => {
     expect(outputJson.coordinateTuple[0]).toBe('Branch');
     expect(outputJson.metadata.owner).toBe('core-team');
     expect(outputJson.auth.username).toBe('admin');
+
+    // 8. Switch Mode dropdown to YAML and verify Generated YAML, YAML Schema, Edit as YAML, and YAML schema update with null in type array
+    const modeSelect = page.getByRole('combobox', { name: 'Mode' });
+    await expect(modeSelect).toContainText('JSON');
+    await modeSelect.click();
+    await page.getByRole('option', { name: 'YAML' }).click();
+    await expect(modeSelect).toContainText('YAML');
+    await expect(page.getByRole('heading', { name: 'Generated YAML' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'YAML Schema' })).toBeVisible();
+
+    const editAsYamlBtn = page.getByRole('button', { name: 'Edit as YAML' }).first();
+    await expect(editAsYamlBtn).toBeVisible();
+    await editAsYamlBtn.click();
+    await expect(page.locator('#json-property-editor')).toBeVisible();
+    const rootYamlEditorText = await page.evaluate(() =>
+      window.ace.edit('demo-output-json').getValue(),
+    );
+    expect(rootYamlEditorText).toContain('serviceName: my-service');
+    await expect(page.locator('#json-property-editor')).toContainText('username: admin');
+    await page.getByRole('button', { name: /Stop editing as YAML/i }).first().click();
+    await expect(page.locator('#json-property-editor')).toHaveCount(0);
+
+    // Update schema in YAML mode with unquoted `- null` in patternProperties type array and verify dropdown options are string, integer, null (never "subschema #2")
+    await page.evaluate(() => {
+      const editor = window.ace.edit('demo-schema-editor');
+      const currentYaml = editor.getValue();
+      const updatedYaml = currentYaml.replace(
+        /\^x-:\n\s+type: string\n\s+description: Pattern property \(\^x-\)/,
+        [
+          '^x-:',
+          '    type:',
+          '      - string',
+          '      - integer',
+          '      - null',
+          '    description: Pattern property (^x-)',
+        ].join('\n'),
+      );
+      editor.setValue(updatedYaml, -1);
+    });
+    const updateYamlSchemaBtn = page.getByRole('button', { name: 'Update editor' });
+    await expect(updateYamlSchemaBtn).toBeEnabled();
+    await updateYamlSchemaBtn.click();
+
+    await clickPropertyItem(page, 'x-custom-header');
+    const yamlTypeCombo = page.locator('.json-by-schema [role="combobox"]').first();
+    await yamlTypeCombo.click();
+    await expect(page.getByRole('option', { name: 'string' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'integer' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'null' })).toBeVisible();
+    await expect(page.getByRole('option', { name: 'null' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+    await expect(page.getByRole('option', { name: /subschema/i })).toHaveCount(0);
+    await page.keyboard.press('Escape');
+
+    await modeSelect.click();
+    await page.getByRole('option', { name: 'JSON' }).click();
+    await expect(modeSelect).toContainText('JSON');
+    await expect(page.getByRole('heading', { name: 'Generated JSON' })).toBeVisible();
   });
 });

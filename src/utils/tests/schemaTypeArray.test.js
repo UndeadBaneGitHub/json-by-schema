@@ -15,6 +15,11 @@ import {
   resetOpenProperty,
   selectSchema,
 } from '../../containers/ObjectPanel/actions';
+import {
+  normalizeFormat,
+  parseStructuredValue,
+  stringifyStructuredValue,
+} from '../formatUtils';
 
 describe('schemaUtils type-array & type-matching helpers', () => {
   it('isValueTypeMatch checks JSON schema types accurately', () => {
@@ -128,5 +133,60 @@ describe('objectPanelReducer RESET_OPEN_PROPERTY and SELECT_SCHEMA', () => {
       state = objectPanelReducer(state, selectSchema(List([0]), 'x-kappa{0}'));
     }).not.toThrow();
     expect(state.getIn(['x-kappa{0}', 'schemaIndexes']).toJS()).toEqual([0]);
+  });
+});
+
+describe('formatUtils JSON and YAML helpers', () => {
+  it('normalizes supported formats', () => {
+    expect(normalizeFormat('json')).toBe('json');
+    expect(normalizeFormat('yaml')).toBe('yaml');
+    expect(normalizeFormat('YAML')).toBe('yaml');
+    expect(normalizeFormat('yml')).toBe('yaml');
+    expect(normalizeFormat(undefined)).toBe('json');
+  });
+
+  it('parses and stringifies JSON and YAML objects accurately', () => {
+    const sample = {
+      serviceName: 'api-gateway',
+      port: 8080,
+      tags: ['alpha', 'beta'],
+      nested: { enabled: true },
+    };
+
+    const jsonStr = stringifyStructuredValue(sample, 'json');
+    expect(jsonStr).toContain('"serviceName": "api-gateway"');
+    expect(parseStructuredValue(jsonStr, 'json')).toEqual(sample);
+
+    const yamlStr = stringifyStructuredValue(sample, 'yaml');
+    expect(yamlStr).toContain('serviceName: api-gateway');
+    expect(yamlStr).toContain('port: 8080');
+    expect(parseStructuredValue(yamlStr, 'yaml')).toEqual(sample);
+  });
+
+  it('normalizes YAML-parsed null in type arrays (e.g. ["string", "integer", null]) to "null" title and type', () => {
+    const yamlSchema = parseStructuredValue(
+      [
+        'type: object',
+        'patternProperties:',
+        '  ^x-:',
+        '    type:',
+        '      - string',
+        '      - integer',
+        '      - null',
+        '    description: Pattern property (^x-)',
+      ].join('\n'),
+      'yaml',
+    );
+    const propSchema = getSchemaForPropertyName(yamlSchema, 'x-custom', yamlSchema);
+    expect(propSchema.oneOf.map((branch) => branch.title)).toEqual([
+      'string',
+      'integer',
+      'null',
+    ]);
+    expect(propSchema.oneOf.map((branch) => branch.type)).toEqual([
+      'string',
+      'integer',
+      'null',
+    ]);
   });
 });

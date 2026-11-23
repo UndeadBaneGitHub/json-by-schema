@@ -15,6 +15,11 @@ import { Switch } from '@base-ui/react/switch';
 
 import injectReducer from '../../utils/injectReducer';
 import { getSelectedSchema } from '../../utils/schemaUtils';
+import {
+  normalizeFormat,
+  parseStructuredValue,
+  stringifyStructuredValue,
+} from '../../utils/formatUtils';
 import { resolveThemeProps } from '../../theme';
 import UnsavedChangesContext from '../../components/UnsavedChangesContext';
 
@@ -104,7 +109,24 @@ export class Editor extends React.PureComponent {
         prevProps.delta !== this.props.delta)
     ) {
       if (this.props.onChange) {
-        this.props.onChange(this.props.storedConfig, this.props.delta);
+        const format = this.getResolvedFormat();
+        const formatted = stringifyStructuredValue(
+          this.props.storedConfig,
+          format,
+        );
+        if (typeof this.props.config === 'string') {
+          this.props.onChange(
+            formatted,
+            this.props.delta,
+            this.props.storedConfig,
+          );
+        } else {
+          this.props.onChange(
+            this.props.storedConfig,
+            this.props.delta,
+            formatted,
+          );
+        }
       }
     }
 
@@ -119,10 +141,43 @@ export class Editor extends React.PureComponent {
     }
   }
 
-  initializeEditor(props) {
-    const { config, schema, path, deltaDepth } = props;
+  getResolvedFormat(props = this.props) {
+    return normalizeFormat(props.format || props.mode);
+  }
 
-    this.props.initialize(path, config, schema, deltaDepth);
+  getResolvedSchema(props = this.props) {
+    const { schema } = props;
+    if (typeof schema === 'string') {
+      try {
+        return parseStructuredValue(schema, this.getResolvedFormat(props));
+      } catch (e) {
+        return null;
+      }
+    }
+    return schema;
+  }
+
+  getResolvedConfig(props = this.props) {
+    const { config } = props;
+    if (typeof config === 'string') {
+      try {
+        return parseStructuredValue(config, this.getResolvedFormat(props));
+      } catch (e) {
+        return undefined;
+      }
+    }
+    return config;
+  }
+
+  initializeEditor(props) {
+    const { path, deltaDepth } = props;
+    const resolvedConfig = this.getResolvedConfig(props);
+    const resolvedSchema = this.getResolvedSchema(props);
+    if (!resolvedSchema) {
+      return;
+    }
+
+    this.props.initialize(path, resolvedConfig, resolvedSchema, deltaDepth);
   }
 
   // eslint-disable-line react/prefer-stateless-function
@@ -135,9 +190,8 @@ export class Editor extends React.PureComponent {
       customValidators,
     } = this.props;
 
-    if (!storedSchema || storedSchema !== this.props.schema) {
-      // no schema has been stored yet, or it is still an old
-      // schema preserved
+    if (!storedSchema) {
+      // no schema has been stored yet
       return null;
     }
 
@@ -163,12 +217,14 @@ export class Editor extends React.PureComponent {
       ? Boolean(this.props.darkMode)
       : this.state.internalDarkMode;
     const rootClassName = isDark ? 'json-by-schema dark' : 'json-by-schema';
+    const format = this.getResolvedFormat();
 
     return (
       <UnsavedChangesContext.Provider
         value={{
           setUnsavedState: this.setUnsavedState,
           guardNavigation: this.guardNavigation,
+          format,
         }}
       >
         <Wrapper ref={this.rootRef} className={rootClassName} {...themeProps}>
@@ -251,6 +307,7 @@ Editor.propTypes = {
   config: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.array,
+    PropTypes.string,
     PropTypes.bool,
   ]),
   initialConfig: PropTypes.oneOfType([
@@ -258,7 +315,9 @@ Editor.propTypes = {
     PropTypes.array,
     PropTypes.bool,
   ]).isRequired,
-  schema: PropTypes.object.isRequired,
+  schema: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
+  format: PropTypes.oneOf(['json', 'yaml']),
+  mode: PropTypes.oneOf(['json', 'yaml']),
   initialize: PropTypes.func.isRequired,
   // eslint-disable-next-line react/no-unused-prop-types
   storedConfig: PropTypes.oneOfType([

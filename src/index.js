@@ -43,6 +43,7 @@ function JsonBySchema(props) {
           deltaDepth={props.deltaDepth}
           theme={props.theme}
           darkMode={props.darkMode}
+          format={props.format || props.mode}
         />
       </IntlProvider>
     </Provider>
@@ -50,8 +51,12 @@ function JsonBySchema(props) {
 }
 
 JsonBySchema.propTypes = {
-  schema: PropTypes.object.isRequired,
-  config: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  schema: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
+  config: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.array,
+    PropTypes.string,
+  ]),
   onChange: PropTypes.func,
   path: PropTypes.string,
   onPathChange: PropTypes.func,
@@ -59,8 +64,15 @@ JsonBySchema.propTypes = {
   deltaDepth: PropTypes.number,
   theme: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   darkMode: PropTypes.bool,
+  format: PropTypes.oneOf(['json', 'yaml']),
+  mode: PropTypes.oneOf(['json', 'yaml']),
 };
 
 export { JsonBySchema };
 export { THEME_PRESETS } from './theme';
 export { CustomValidationError, CustomValidationResult } from './customValidation';
+export {
+  SUPPORTED_FORMATS,
+  parseStructuredValue,
+  stringifyStructuredValue,
+} from './utils/formatUtils';
