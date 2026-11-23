@@ -1,36 +1,62 @@
 {
   "name": "json-by-schema",
   "version": "0.2.0",
-  "description": "A UI component to generate JSON values by provided JSON schema",
+  "description": "A React UI component to view and edit JSON or YAML configurations driven by a JSON Schema",
   "author": "UndeadBaneGitHub <u9262450174@gmail.com>",
   "license": "MIT",
+  "homepage": "https://undeadbanegithub.github.io/json-by-schema/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UndeadBaneGitHub/json-by-schema.git"
+  },
+  "bugs": {
+    "url": "https://github.com/UndeadBaneGitHub/json-by-schema/issues"
+  },
   "type": "module",
   "main": "./dist/json-by-schema.cjs",
   "module": "./dist/json-by-schema.js",
+  "types": "./src/index.d.ts",
+  "style": "./dist/json-by-schema.css",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": {
+      "types": "./src/index.d.ts",
       "import": "./dist/json-by-schema.js",
       "require": "./dist/json-by-schema.cjs"
-    }
+    },
+    "./styles.css": "./dist/json-by-schema.css",
+    "./dist/json-by-schema.css": "./dist/json-by-schema.css",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "src",
+    "src/index.d.ts",
     "LICENSE",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "JSONSchema",
     "JSON",
+    "YAML",
     "React",
     "Redux",
-    "Vite"
+    "Vite",
+    "SchemaEditor",
+    "ConfigEditor"
   ],
   "scripts": {
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
+    "build:demo": "vite build --mode demo",
     "preview": "vite preview",
+    "preview:demo": "vite preview --outDir dist-demo",
+    "prepublishOnly": "pnpm lint && pnpm test && pnpm build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -74,5 +100,9 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   }
 }
