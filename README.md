@@ -190,22 +190,11 @@ pnpm test:e2e
 # Build npm library bundle into dist/
 pnpm build
 
-# Build static demo playground into dist-demo/ (used for GitHub Pages)
+# Build static demo playground into dist-demo/
 pnpm build:demo
 ```
 
 ---
-
-## Publishing & Deployment
-
-### Unified Release Workflow (`publish.yml`)
-[`.github/workflows/publish.yml`](.github/workflows/publish.yml) publishes **both** the package to **npmjs** and the updated **GitHub Pages demo playground** in a single release pipeline whenever a `v*` tag is pushed, a GitHub Release is published, or the workflow is triggered manually:
-
-1. In your GitHub repository settings under **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions** (pushes to `main` also deploy the demo via [`.github/workflows/pages.yml`](.github/workflows/pages.yml)).
-2. Add an `NPM_TOKEN` repository secret in GitHub (**Settings → Secrets and variables → Actions**) containing an npm automation access token.
-3. Bump the version in `package.json`, tag the release (e.g. `git tag v0.2.0 && git push origin v0.2.0`), or publish a GitHub Release.
-4. [`.github/workflows/publish.yml`](.github/workflows/publish.yml) will automatically lint, test, build, publish the package to npm with provenance (`npm publish --provenance --access public`), build the demo playground (`pnpm build:demo`), and deploy it to GitHub Pages.
-5. You can also publish to npm manually from your terminal with `npm publish` / `pnpm publish` (`prepublishOnly` automatically runs `pnpm lint && pnpm test && pnpm build`).
 
 ## License
 
