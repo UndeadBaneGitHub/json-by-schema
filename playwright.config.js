@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
@@ -14,10 +14,26 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:5173',
-    ...(process.env.CI ? {} : { channel: 'chrome' }),
     viewport: { width: 1440, height: 900 },
     trace: 'on-first-retry',
   },
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(process.env.CI ? {} : { channel: 'chrome' }),
+        viewport: { width: 1440, height: 900 },
+      },
+    },
+    {
+      name: 'firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1440, height: 900 },
+      },
+    },
+  ],
   webServer: {
     command: 'pnpm start --port 5173',
     url: 'http://localhost:5173',

@@ -6,8 +6,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import ImmutableProptypes from 'react-immutable-proptypes';
-
 import ErrorListItem from '../../components/ErrorListItem';
 import { generateIdPrefixFromPath } from '../../utils/schemaUtils';
 
@@ -53,7 +51,7 @@ function ErrorList(props) {
 
 ErrorList.propTypes = {
   path: PropTypes.string.isRequired,
-  errors: ImmutableProptypes.map.isRequired,
+  errors: PropTypes.object.isRequired,
   filter: PropTypes.func,
 };
 

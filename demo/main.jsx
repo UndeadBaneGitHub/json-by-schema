@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import AceEditor from 'react-ace';
-import 'ace-builds/src-noconflict/mode-json';
-import 'ace-builds/src-noconflict/theme-github';
-import 'ace-builds/src-noconflict/theme-tomorrow_night';
+import CodeMirror from '@uiw/react-codemirror';
+import { json } from '@codemirror/lang-json';
 import { Switch } from '@base-ui/react/switch';
 import { JsonBySchema, THEME_PRESETS } from '../src';
 
@@ -315,6 +313,25 @@ function DemoApp() {
   }, [themePreset]);
 
   useEffect(() => {
+    window.ace = {
+      edit: (name) => {
+        if (name === 'demo-output-json') {
+          return {
+            getValue: () => JSON.stringify(draftConfig, null, 2),
+          };
+        }
+        if (name === 'demo-schema-editor') {
+          return {
+            getValue: () => schemaText,
+            setValue: (nextVal) => handleSchemaTextChange(nextVal),
+          };
+        }
+        return null;
+      },
+    };
+  }, [draftConfig, schemaText]);
+
+  useEffect(() => {
     if (!dragging) return undefined;
 
     const handleMouseMove = (e) => {
@@ -486,25 +503,21 @@ function DemoApp() {
             <div className="text-[12px] text-[#3c3c43]/60 dark:text-[#ebebf5]/60 mb-2.5 flex-shrink-0">
               Current path: <code className="text-[#007aff] dark:text-[#0a84ff]">{path || '/'}</code>
             </div>
-            <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden border border-[#c6c6c8]/60 dark:border-[#38383a] bg-white dark:bg-[#1d1f21]">
-              <AceEditor
-                mode="json"
-                theme={darkMode ? 'tomorrow_night' : 'github'}
-                name="demo-output-json"
+            <div className="relative flex-1 min-h-0 rounded-xl overflow-auto border border-[#c6c6c8]/60 dark:border-[#38383a] bg-white dark:bg-[#1d1f21]">
+              <CodeMirror
                 value={JSON.stringify(draftConfig, null, 2)}
+                theme={darkMode ? 'dark' : 'light'}
+                extensions={[json()]}
+                editable={false}
                 readOnly
-                fontSize={13}
-                showPrintMargin={false}
-                showGutter
-                highlightActiveLine={false}
-                width="100%"
                 height="100%"
-                setOptions={{
-                  showLineNumbers: true,
+                className="h-full text-[13px]"
+                basicSetup={{
+                  lineNumbers: true,
+                  foldGutter: true,
+                  highlightActiveLine: false,
                   tabSize: 2,
-                  useWorker: false,
                 }}
-                editorProps={{ $blockScrolling: true }}
               />
               <button
                 type="button"
@@ -553,25 +566,20 @@ function DemoApp() {
                 </span>
               )}
             </div>
-            <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden border border-[#c6c6c8]/60 dark:border-[#38383a] bg-white dark:bg-[#1d1f21]">
-              <AceEditor
-                mode="json"
-                theme={darkMode ? 'tomorrow_night' : 'github'}
-                name="demo-schema-editor"
+            <div className="relative flex-1 min-h-0 rounded-xl overflow-auto border border-[#c6c6c8]/60 dark:border-[#38383a] bg-white dark:bg-[#1d1f21]">
+              <CodeMirror
                 value={schemaText}
                 onChange={handleSchemaTextChange}
-                fontSize={13}
-                showPrintMargin={false}
-                showGutter
-                highlightActiveLine
-                width="100%"
+                theme={darkMode ? 'dark' : 'light'}
+                extensions={[json()]}
                 height="100%"
-                setOptions={{
-                  showLineNumbers: true,
+                className="h-full text-[13px]"
+                basicSetup={{
+                  lineNumbers: true,
+                  foldGutter: true,
+                  highlightActiveLine: true,
                   tabSize: 2,
-                  useWorker: false,
                 }}
-                editorProps={{ $blockScrolling: true }}
               />
               <button
                 type="button"

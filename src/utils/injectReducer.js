@@ -1,6 +1,5 @@
 import React from 'react';
 import { ReactReduxContext } from 'react-redux';
-import hoistNonReactStatics from 'hoist-non-react-statics';
 
 import getInjectors from './reducerInjectors';
 
@@ -33,5 +32,5 @@ export default ({ key, reducer }) => (WrappedComponent) => {
     }
   }
 
-  return hoistNonReactStatics(ReducerInjector, WrappedComponent);
+  return ReducerInjector;
 };

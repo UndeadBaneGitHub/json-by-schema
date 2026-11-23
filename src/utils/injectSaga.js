@@ -1,6 +1,5 @@
 import React from 'react';
 import { ReactReduxContext } from 'react-redux';
-import hoistNonReactStatics from 'hoist-non-react-statics';
 
 import getInjectors from './sagaInjectors';
 
@@ -41,5 +40,5 @@ export default ({ key, saga, mode }) => (WrappedComponent) => {
     }
   }
 
-  return hoistNonReactStatics(InjectSaga, WrappedComponent);
+  return InjectSaga;
 };

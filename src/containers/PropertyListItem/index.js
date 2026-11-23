@@ -6,15 +6,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
 
 import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
 import Highlighter from 'react-highlight-words';
-import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed';
-import ImmutableProptypes from 'react-immutable-proptypes';
 
 import { genId, stopPropagation } from '../../utils/generalUtils';
 import {
@@ -54,6 +51,7 @@ export class PropertyListItem extends React.PureComponent {
   constructor(props) {
     super(props);
 
+    this.itemRef = React.createRef();
     this.handleClick = this.handleClick.bind(this);
     this.handleSchemaSelectChange = this.handleSchemaSelectChange.bind(this);
 
@@ -63,8 +61,7 @@ export class PropertyListItem extends React.PureComponent {
         if (!self.mounted) {
           return;
         }
-        // eslint-disable-next-line react/no-find-dom-node
-        const node = ReactDOM.findDOMNode(self);
+        const node = self.itemRef.current;
         if (node && typeof node.scrollIntoView === 'function') {
           node.scrollIntoView({
             behavior: 'smooth',
@@ -236,6 +233,7 @@ export class PropertyListItem extends React.PureComponent {
 
     return (
       <ListItemWrapper
+        ref={this.itemRef}
         onClick={this.handleClick}
         expanded={expanded}
         noSchema={!schema}
@@ -295,8 +293,8 @@ PropertyListItem.propTypes = {
   schema: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
   path: PropTypes.string.isRequired,
   parentPath: PropTypes.string.isRequired,
-  schemaIndexes: ImmutableProptypes.list.isRequired,
-  errors: ImmutableProptypes.list.isRequired,
+  schemaIndexes: PropTypes.object.isRequired,
+  errors: PropTypes.object.isRequired,
   expanded: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
   updatePath: PropTypes.func.isRequired,

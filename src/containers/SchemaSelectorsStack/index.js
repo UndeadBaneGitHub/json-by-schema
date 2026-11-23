@@ -6,7 +6,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ImmutableProptypes from 'react-immutable-proptypes';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { getSchemaByIndex, isMultipleChoiceSchema } from '../../utils/schemaUtils';
@@ -88,7 +87,7 @@ export class SchemaSelectorsStack extends React.PureComponent {
 }
 
 SchemaSelectorsStack.propTypes = {
-  schemaIndexes: ImmutableProptypes.list.isRequired,
+  schemaIndexes: PropTypes.object.isRequired,
   schema: PropTypes.object.isRequired,
   path: PropTypes.string.isRequired,
   rootSchema: PropTypes.object.isRequired,

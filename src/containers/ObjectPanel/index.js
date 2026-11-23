@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { List } from 'immutable';
-import ImmutableProptypes from 'react-immutable-proptypes';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
@@ -138,6 +137,9 @@ export class ObjectPanel extends React.Component {
       const self = this;
       if (self.scrollableWrapper) {
         setTimeout(() => {
+          if (!self.scrollableWrapper) {
+            return;
+          }
           const schemaSelectorWrapperHeight = self.schemaSelectorWrapper
             ? getAbsoluteHeight(self.schemaSelectorWrapper)
             : 0;
@@ -168,6 +170,9 @@ export class ObjectPanel extends React.Component {
       }
       if (self.jsonEditor) {
         setTimeout(() => {
+          if (!self.jsonEditor) {
+            return;
+          }
           const editAsJSONBtnHeight = self.editAsJSONBtn
             ? getAbsoluteHeight(self.editAsJSONBtn)
             : 0;
@@ -1038,13 +1043,13 @@ ObjectPanel.propTypes = {
     PropTypes.array,
     PropTypes.bool,
   ]).isRequired,
-  schemaIndexes: ImmutableProptypes.list.isRequired,
+  schemaIndexes: PropTypes.object.isRequired,
   displayNewPatternPropertyItem: PropTypes.bool.isRequired,
   showNewPatternPropertyItem: PropTypes.func.isRequired,
   hideNewPatternPropertyItem: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
   rootSchema: PropTypes.object.isRequired,
-  errors: ImmutableProptypes.map,
+  errors: PropTypes.object,
   openProperty: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.array,

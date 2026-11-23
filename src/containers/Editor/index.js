@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
-import ImmutableProptypes from 'react-immutable-proptypes';
 import { List } from 'immutable';
 import { AlertDialog } from '@base-ui/react/alert-dialog';
 import { Switch } from '@base-ui/react/switch';
@@ -270,7 +269,7 @@ Editor.propTypes = {
   storedSchema: PropTypes.oneOfType([PropTypes.object, PropTypes.bool])
     .isRequired,
   topLevelSchemaIndexes: PropTypes.oneOfType([
-    ImmutableProptypes.list,
+    PropTypes.object,
     PropTypes.bool,
   ]).isRequired,
   onChange: PropTypes.func,

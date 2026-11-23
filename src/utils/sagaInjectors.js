@@ -1,7 +1,3 @@
-import isEmpty from 'lodash.isempty';
-import conformsTo from 'lodash.conformsto';
-import invariant from 'invariant';
-
 import { isFunction, isString } from './generalUtils';
 
 import checkStore from './checkStore';
@@ -9,21 +5,23 @@ import { DAEMON, ONCE_TILL_UNMOUNT, RESTART_ON_REMOUNT } from './constants';
 
 const allowedModes = [RESTART_ON_REMOUNT, DAEMON, ONCE_TILL_UNMOUNT];
 
-const checkKey = (key) =>
-  invariant(
-    isString(key) && !isEmpty(key),
-    '(app/utils...) injectSaga: Expected `key` to be a non empty string',
-  );
+const checkKey = (key) => {
+  if (!(isString(key) && key.length > 0)) {
+    throw new Error('(app/utils...) injectSaga: Expected `key` to be a non empty string');
+  }
+};
 
 const checkDescriptor = (descriptor) => {
-  const shape = {
-    saga: isFunction,
-    mode: (mode) => isString(mode) && allowedModes.includes(mode),
-  };
-  invariant(
-    conformsTo(descriptor, shape),
-    '(app/utils...) injectSaga: Expected a valid saga descriptor',
-  );
+  const isValid =
+    descriptor &&
+    typeof descriptor === 'object' &&
+    isFunction(descriptor.saga) &&
+    isString(descriptor.mode) &&
+    allowedModes.includes(descriptor.mode);
+
+  if (!isValid) {
+    throw new Error('(app/utils...) injectSaga: Expected a valid saga descriptor');
+  }
 };
 
 export function injectSagaFactory(store, isValid) {
@@ -56,11 +54,10 @@ export function injectSagaFactory(store, isValid) {
       !hasSaga ||
       (hasSaga && mode !== DAEMON && mode !== ONCE_TILL_UNMOUNT)
     ) {
-      // eslint-disable-next-line no-param-reassign
       store.injectedSagas[key] = {
         ...newDescriptor,
         task: store.runSaga(saga, args),
-      }; // eslint-disable-line no-param-reassign
+      };
     }
   };
 }
@@ -80,7 +77,7 @@ export function ejectSagaFactory(store, isValid) {
         // Clean up in production; in development we need `descriptor.saga` for hot reloading
         if (process.env.NODE_ENV === 'production') {
           // Need some value to be able to detect `ONCE_TILL_UNMOUNT` sagas in `injectSaga`
-          store.injectedSagas[key] = 'done'; // eslint-disable-line no-param-reassign
+          store.injectedSagas[key] = 'done';
         }
       }
     }

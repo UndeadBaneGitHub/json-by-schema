@@ -8,10 +8,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 
-import AceEditor from 'react-ace';
-import 'ace-builds/src-noconflict/theme-github';
-import 'ace-builds/src-noconflict/theme-tomorrow_night';
-import 'ace-builds/src-noconflict/mode-json';
+import CodeMirror from '@uiw/react-codemirror';
+import { json } from '@codemirror/lang-json';
 
 import { Switch } from '@base-ui/react/switch';
 import { Slider } from '@base-ui/react/slider';
@@ -113,30 +111,19 @@ function JsonAceEditor({ strValue, onChange }) {
   }, []);
 
   return (
-    <div ref={containerRef}>
-      <AceEditor
-        mode="json"
-        theme={isDark ? 'tomorrow_night' : 'github'}
-        name="json-property-editor"
+    <div id="json-property-editor" ref={containerRef} className="rounded-[10px] overflow-hidden">
+      <CodeMirror
+        value={strValue || ''}
+        height="450px"
+        theme={isDark ? 'dark' : 'light'}
+        extensions={[json()]}
         onChange={onJsonEditorChange(onChange)}
-        fontSize={14}
-        showPrintMargin
-        showGutter
-        highlightActiveLine
-        value={strValue}
-        setOptions={{
-          showLineNumbers: true,
+        basicSetup={{
+          lineNumbers: true,
+          foldGutter: true,
+          highlightActiveLine: true,
           tabSize: 2,
         }}
-        minLines={25}
-        maxLines={120}
-        wrapEnabled
-        style={{
-          width: '100%',
-          borderRadius: '10px',
-          backgroundColor: isDark ? '#1d1f21' : '#f2f2f7',
-        }}
-        editorProps={{ $blockScrolling: true }}
       />
     </div>
   );

@@ -1,16 +1,26 @@
-import { defineConfig } from 'vite';
+import { defineConfig, transformWithOxc } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+
+const jsxInJsPlugin = {
+  name: 'jsx-in-js',
+  enforce: 'pre',
+  async transform(code, id) {
+    if (!id.includes('node_modules') && /\.js$/.test(id) && code.includes('<')) {
+      return transformWithOxc(code, id, {
+        lang: 'jsx',
+        jsx: { runtime: 'automatic' },
+      });
+    }
+    return null;
+  },
+};
 
 export default defineConfig(({ command }) => ({
-  plugins: [react()],
-  esbuild: {
-    loader: 'jsx',
-    include: /\.(js|jsx)$/,
-    exclude: /node_modules/,
-  },
+  plugins: [tailwindcss(), jsxInJsPlugin, react()],
   optimizeDeps: {
-    esbuildOptions: {
-      loader: {
+    rolldownOptions: {
+      moduleTypes: {
         '.js': 'jsx',
       },
     },

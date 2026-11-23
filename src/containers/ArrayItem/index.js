@@ -6,14 +6,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
 
 import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
-import ImmutableProptypes from 'react-immutable-proptypes';
-import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed';
 
 import { genId, stopPropagation } from '../../utils/generalUtils';
 import {
@@ -54,6 +51,7 @@ export class ArrayItem extends React.PureComponent {
   constructor(props) {
     super(props);
 
+    this.itemRef = React.createRef();
     this.handleClick = this.handleClick.bind(this);
     this.handleSchemaSelectChange = this.handleSchemaSelectChange.bind(this);
 
@@ -63,8 +61,7 @@ export class ArrayItem extends React.PureComponent {
         if (!self.mounted) {
           return;
         }
-        // eslint-disable-next-line react/no-find-dom-node
-        const node = ReactDOM.findDOMNode(self);
+        const node = self.itemRef.current;
         if (node && typeof node.scrollIntoView === 'function') {
           node.scrollIntoView({
             behavior: 'smooth',
@@ -213,7 +210,12 @@ export class ArrayItem extends React.PureComponent {
     }
 
     return (
-      <ListItemWrapper onClick={onClick} expanded={expanded} noSchema={!schema}>
+      <ListItemWrapper
+        ref={this.itemRef}
+        onClick={onClick}
+        expanded={expanded}
+        noSchema={!schema}
+      >
         <ListItemInnerWrapper
           className={'hyphenate'}
           expanded={expanded}
@@ -274,7 +276,7 @@ ArrayItem.propTypes = {
   schema: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
   path: PropTypes.string.isRequired,
   parentPath: PropTypes.string.isRequired,
-  schemaIndexes: ImmutableProptypes.list.isRequired,
+  schemaIndexes: PropTypes.object.isRequired,
   expanded: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
@@ -287,7 +289,7 @@ ArrayItem.propTypes = {
   hasInitialConfigValue: PropTypes.bool.isRequired,
   rootSchema: PropTypes.object.isRequired,
   changed: PropTypes.bool.isRequired,
-  errors: ImmutableProptypes.list.isRequired,
+  errors: PropTypes.object.isRequired,
   scrollableContainer: PropTypes.object,
 };
 

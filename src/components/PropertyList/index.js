@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {
   DndContext,
   closestCenter,
+  MouseSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -56,6 +57,11 @@ SortableItem.propTypes = {
 function PropertiesList(props) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(MouseSensor, {
       activationConstraint: {
         distance: 5,
       },
