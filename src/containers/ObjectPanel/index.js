@@ -124,7 +124,7 @@ export class ObjectPanel extends React.Component {
     this.handleEditAsJSONClick = (evt) => {
       stopPropagation(evt);
 
-      const guard = this.context && this.context.guardNavigation;
+      const guard = this.context?.guardNavigation;
       const toggle = () => this.props.toggleEditAsJson(this.props.path);
       if (guard) {
         guard(toggle);
@@ -296,7 +296,7 @@ export class ObjectPanel extends React.Component {
 
   getErrorsCount() {
     const { errors } = this.props;
-    if (!errors || !errors.size) {
+    if (!errors?.size) {
       return 0;
     }
     return errors.keySeq().reduce((res, key) => {
@@ -395,7 +395,7 @@ export class ObjectPanel extends React.Component {
     });
 
     // time for custom validators
-    if (this.props.customValidators && this.props.customValidators.length) {
+    if (this.props.customValidators?.length) {
       const customValidationErrors = this.props.customValidators.reduce(
         (res, validatorFn) => {
           const validationResult = validatorFn({
@@ -470,7 +470,7 @@ export class ObjectPanel extends React.Component {
   }
 
   safeUpdatePath(nextPath) {
-    if (this.context && this.context.guardNavigation) {
+    if (this.context?.guardNavigation) {
       this.context.guardNavigation(() => this.props.updatePath(nextPath));
     } else {
       this.props.updatePath(nextPath);
@@ -677,7 +677,7 @@ export class ObjectPanel extends React.Component {
       }
       case 'array': {
         res =
-          config.map((item, index) =>
+          config.map((_item, index) =>
             this.genItem(index, genPropObject, idPrefix),
           ) || [];
         break;
@@ -734,7 +734,7 @@ export class ObjectPanel extends React.Component {
     // So, we would attempt to get config value directly
     if (
       genPropObject.config &&
-      {}.hasOwnProperty.call(genPropObject.config, propName)
+      Object.hasOwn(genPropObject.config, propName)
     ) {
       propConfig = genPropObject.config[propName];
     }
@@ -790,7 +790,7 @@ export class ObjectPanel extends React.Component {
       return null;
     }
 
-    if (openProperty && openProperty.schema.type) {
+    if (openProperty?.schema?.type) {
       const configPanelProps = {
         ...openProperty,
         isChild: true,
@@ -993,7 +993,7 @@ export class ObjectPanel extends React.Component {
               {this.renderNoItemsElement()}
               <NewPatternPropertyItem {...newPatternPropertyProps} />
               <AddItemButton
-                hide={!schema || schema.type !== 'array'}
+                hide={schema?.type !== 'array'}
                 onClick={this.handleAddItemClick}
               />
             </ScrollableWrapper>
@@ -1017,7 +1017,7 @@ export class ObjectPanel extends React.Component {
           <EditAsJSONButton
             showStop={editAsJSON}
             onClick={this.handleEditAsJSONClick}
-            format={this.context && this.context.format}
+            format={this.context?.format}
           />
         </EditAsJSONButtonWrapper>
       </Wrapper>
@@ -1072,7 +1072,7 @@ ObjectPanel.propTypes = {
   customValidators: PropTypes.arrayOf(PropTypes.func),
 };
 
-const mapStateToProps = (state, props) =>
+const mapStateToProps = (_state, props) =>
   createStructuredSelector({
     initialized: makeSelectHasBeenInitialized(),
     loading: makeSelectLoading(props.path),

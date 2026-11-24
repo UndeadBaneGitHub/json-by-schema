@@ -139,7 +139,7 @@ export class ArrayItem extends React.PureComponent {
       const { name, parentPath } = this.props;
 
       const newPath = genPath(name, parentPath, schemaIndexes);
-      if (this.context && this.context.guardNavigation) {
+      if (this.context?.guardNavigation) {
         this.context.guardNavigation(() => this.props.updatePath(newPath));
       } else {
         this.props.updatePath(newPath);
@@ -171,7 +171,7 @@ export class ArrayItem extends React.PureComponent {
 
   renderErrors() {
     const { path, errors } = this.props;
-    if (errors && errors.size) {
+    if (errors?.size) {
       const res = errors.map((error) => (
         <ErrorMessageWrapper key={`${path}_${genId()}`}>
           <ErrorMessage

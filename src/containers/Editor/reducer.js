@@ -183,7 +183,6 @@ function getDelta({ denormOldObj, denormNewObj, prevDelta }) {
 
         break;
       }
-      case 'array':
       default: {
         if (denormOldObj && denormNewObj) {
           res.UPDATE[''] = denormNewObj;
@@ -224,7 +223,7 @@ function denormalizeConfig({ config, prefix, depth, curDepth = 0, res = {} }) {
 
   const configKeys = Object.keys(config);
 
-  if (configKeys && configKeys.length) {
+  if (configKeys?.length) {
     configKeys.forEach((key) => {
       const val = config[key];
       if (

@@ -131,7 +131,7 @@ export function getSchemaForPropertyName(schema, propName, rootSchema) {
 }
 
 export function getConfigForPropertyName(config, propSchema, propName) {
-  if ({}.hasOwnProperty.call(config, propName)) {
+  if (config != null && Object.hasOwn(config, propName)) {
     return config[propName];
   }
 
@@ -142,7 +142,7 @@ export function getConfigForPropertyName(config, propSchema, propName) {
   return generateDefaultValueForProperty(propSchema, propName);
 }
 export function hasConfigValueForPropertyName(config, propName) {
-  return {}.hasOwnProperty.call(config, propName);
+  return config != null && Object.hasOwn(config, propName);
 }
 
 export function generateIdPrefixFromPath(path) {
@@ -194,8 +194,6 @@ export function setValueType(value, type) {
       return String(value).toLowerCase() === 'true';
     case 'null':
       return null;
-    case 'object':
-    case 'array':
     default:
       return value;
   }
@@ -429,10 +427,7 @@ export function combineAllOf(schema, rootSchema) {
 
   if (schema.allOf) {
     const schemaComponents = schema.allOf;
-    return schemaComponents.reduce((res, schemaComponent) => ({
-      ...res,
-      ...schemaComponent,
-    }));
+    return Object.assign({}, ...schemaComponents);
   }
   return deRefSchema(schema, rootSchema);
 }
@@ -464,7 +459,7 @@ export function isConfigEmpty(config, schema) {
     case 'integer':
       return !config && config !== 0 && config !== '';
     case 'array':
-      return !(config && config.length);
+      return !(config?.length);
     case 'object':
       return !(config && Object.keys(config).length);
     case 'boolean':
@@ -530,7 +525,7 @@ function normalizeTypeArraySchema(schema) {
 }
 
 export function deRefSchema(schema, rootSchema, visited = new Set()) {
-  if (!schema || !schema.$ref || !rootSchema) {
+  if (!schema?.$ref || !rootSchema) {
     return normalizeTypeArraySchema(schema);
   }
 

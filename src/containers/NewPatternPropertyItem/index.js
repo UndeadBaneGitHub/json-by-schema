@@ -160,7 +160,7 @@ export class NewPatternPropertyItem extends React.PureComponent {
         : null;
 
     if (!errorMessage) {
-      const propertyAlreadyExists = {}.hasOwnProperty.call(config, newName);
+      const propertyAlreadyExists = Object.hasOwn(config, newName);
       if (propertyAlreadyExists) {
         errorMessage = ErrorMessage({
           message: messages.duplicatePropNameError,
@@ -235,7 +235,7 @@ NewPatternPropertyItem.propTypes = {
   updatePath: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = (state, props) =>
+const mapStateToProps = (_state, props) =>
   createStructuredSelector({
     newName: makeSelectNewValue(props.path),
     numMatchingPatterns: makeSelectNumMatchingPatterns(props.path),

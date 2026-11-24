@@ -1,15 +1,14 @@
 const TEST_KEY = '__test';
 
 function hasStorage(...args) {
-  const name =
-    arguments.length > 0 && args[0] !== undefined ? args[0] : 'localStorage';
+  const name = args.length > 0 && args[0] !== undefined ? args[0] : 'localStorage';
 
   try {
     const storage = window[name];
     storage.setItem(TEST_KEY, '1');
     storage.removeItem(TEST_KEY);
     return true;
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }
@@ -18,7 +17,7 @@ function MemoryStorage() {
   this.data = {};
 
   this.getItem = function getItem(key) {
-    return {}.hasOwnProperty.call(this.data, key) ? this.data[key] : undefined;
+    return Object.hasOwn(this.data, key) ? this.data[key] : undefined;
   };
   this.setItem = function setItem(key, value) {
     this.data[key] = String(value);

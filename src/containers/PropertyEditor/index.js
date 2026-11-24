@@ -76,7 +76,7 @@ export class PropertyEditor extends React.PureComponent {
       ) {
         return stringifyStructuredValue(
           config,
-          this.context && this.context.format,
+          this.context?.format,
         );
       }
       return config === undefined || config === null ? '' : String(config);
@@ -101,7 +101,7 @@ export class PropertyEditor extends React.PureComponent {
         this.getConfigString(initialVal),
         this.props.path,
       );
-      if (this.context && this.context.setUnsavedState) {
+      if (this.context?.setUnsavedState) {
         this.context.setUnsavedState(false, null);
       }
     };
@@ -117,7 +117,7 @@ export class PropertyEditor extends React.PureComponent {
         : processInputValue(
             evt.target.value,
             this.props.schema.type,
-            this.context && this.context.format,
+            this.context?.format,
             this.props.jsonEditor,
           );
       const nextStrValue = isExplicitNull
@@ -146,7 +146,7 @@ export class PropertyEditor extends React.PureComponent {
 
       this.userModified = false;
       this.props.updateConfigForPath(this.props.newValue, this.props.path);
-      if (this.context && this.context.setUnsavedState) {
+      if (this.context?.setUnsavedState) {
         this.context.setUnsavedState(false, null);
       }
     };
@@ -163,7 +163,7 @@ export class PropertyEditor extends React.PureComponent {
   }
 
   syncUnsavedState() {
-    if (this.context && this.context.setUnsavedState) {
+    if (this.context?.setUnsavedState) {
       this.context.setUnsavedState(
         Boolean(this.userModified && this.isFieldDirty()),
         () => this.onRevert(),
@@ -173,7 +173,7 @@ export class PropertyEditor extends React.PureComponent {
 
   componentDidMount() {
     this.userModified = false;
-    this.prevFormat = this.context && this.context.format;
+    this.prevFormat = this.context?.format;
     const initialVal = this.getInitialEditorValue(
       this.props.config,
       this.props.schema,
@@ -183,14 +183,14 @@ export class PropertyEditor extends React.PureComponent {
       this.getConfigString(initialVal),
       this.props.path,
     );
-    if (this.context && this.context.setUnsavedState) {
+    if (this.context?.setUnsavedState) {
       this.context.setUnsavedState(false, null);
     }
     scrollPanelIntoView(this.panelRef);
   }
 
   componentDidUpdate(prevProps) {
-    const currentFormat = this.context && this.context.format;
+    const currentFormat = this.context?.format;
     const formatChanged = this.prevFormat !== currentFormat;
     this.prevFormat = currentFormat;
 
@@ -210,7 +210,7 @@ export class PropertyEditor extends React.PureComponent {
         this.getConfigString(initialVal),
         this.props.path,
       );
-      if (this.context && this.context.setUnsavedState) {
+      if (this.context?.setUnsavedState) {
         this.context.setUnsavedState(false, null);
       }
       scrollPanelIntoView(this.panelRef);
@@ -226,7 +226,7 @@ export class PropertyEditor extends React.PureComponent {
   }
 
   componentWillUnmount() {
-    if (this.context && this.context.setUnsavedState) {
+    if (this.context?.setUnsavedState) {
       this.context.setUnsavedState(false, null);
     }
   }
@@ -259,7 +259,7 @@ export class PropertyEditor extends React.PureComponent {
 
     let errors = validationResult.errors;
 
-    if (customValidators && customValidators.length) {
+    if (customValidators?.length) {
       errors = errors.concat(
         this.props.customValidators.reduce((res, validatorFn) => {
           const customValidationResult = validatorFn({
@@ -289,13 +289,13 @@ export class PropertyEditor extends React.PureComponent {
   hasValidationErrors() {
     const errors = this.validateConfigValue();
 
-    return !(errors && errors.length);
+    return !(errors?.length);
   }
 
   renderValidationMessage() {
     const validationErrors = this.validateConfigValue();
 
-    if (validationErrors && validationErrors.length) {
+    if (validationErrors?.length) {
       const res = validationErrors.map((error) => (
         <ErrorMessage
           key={genId()}
@@ -365,7 +365,7 @@ export class PropertyEditor extends React.PureComponent {
             multipleOf={this.props.schema.multipleOf}
             allowsNull={Boolean(this.props.schema.allowsNull)}
             jsonEditor={this.props.jsonEditor}
-            format={(this.context && this.context.format) || 'json'}
+            format={(this.context?.format) || 'json'}
             onChange={this.onChange}
             onSubmit={this.onSubmit}
             onRevert={this.onRevert}
@@ -428,7 +428,7 @@ const processInputValue = (val, type, format, isRawEditor) => {
   if (isRawEditor || ['object', 'array'].includes(type)) {
     try {
       newVal = parseStructuredValue(newVal, format);
-    } catch (ex) {
+    } catch (_ex) {
       // do nothing
     }
   }
