@@ -1,6 +1,6 @@
 {
   "name": "json-by-schema",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A React UI component to view and edit JSON or YAML configurations driven by a JSON Schema",
   "author": "UndeadBaneGitHub <u9262450174@gmail.com>",
   "license": "MIT",
