@@ -101,7 +101,7 @@ function JsonAceEditor({ strValue, onChange, format }) {
       attributes: true,
       attributeFilter: ['class'],
     });
-    const jbsRoot = containerRef.current && containerRef.current.closest('.json-by-schema');
+    const jbsRoot = containerRef.current?.closest('.json-by-schema');
     if (jbsRoot && jbsRoot !== document.documentElement) {
       observer.observe(jbsRoot, {
         attributes: true,

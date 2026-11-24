@@ -238,7 +238,7 @@ function DemoApp() {
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('jbs-dark-mode');
     if (saved !== null) return saved === 'true';
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches;
   });
 
   const [copied, setCopied] = useState(false);

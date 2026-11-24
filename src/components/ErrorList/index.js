@@ -12,7 +12,7 @@ import { generateIdPrefixFromPath } from '../../utils/schemaUtils';
 import Wrapper from './Wrapper';
 
 function ErrorList(props) {
-  if (props.errors && props.errors.size) {
+  if (props.errors?.size) {
     const idPrefix = generateIdPrefixFromPath(props.path);
 
     const errorItems = [];
@@ -25,7 +25,7 @@ function ErrorList(props) {
       const key = `error-${idPrefix}${id}`;
 
       const errorList = props.errors.get(id);
-      if (!errorList || !errorList.size) {
+      if (!errorList?.size) {
         return;
       }
 

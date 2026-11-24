@@ -68,7 +68,7 @@ function PropertiesList(props) {
     }),
   );
 
-  if (!props.items || !props.items.length || !props.component) {
+  if (!props.items?.length || !props.component) {
     return null;
   }
 

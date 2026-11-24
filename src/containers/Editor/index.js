@@ -150,7 +150,7 @@ export class Editor extends React.PureComponent {
     if (typeof schema === 'string') {
       try {
         return parseStructuredValue(schema, this.getResolvedFormat(props));
-      } catch (e) {
+      } catch (_e) {
         return null;
       }
     }
@@ -162,7 +162,7 @@ export class Editor extends React.PureComponent {
     if (typeof config === 'string') {
       try {
         return parseStructuredValue(config, this.getResolvedFormat(props));
-      } catch (e) {
+      } catch (_e) {
         return undefined;
       }
     }

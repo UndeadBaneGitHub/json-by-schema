@@ -77,9 +77,9 @@ export interface JsonBySchemaProps {
    * Callback invoked whenever a configuration value is saved or updated.
    */
   onChange?: (
-    value: any,
+    value: unknown,
     delta: Record<string, unknown> | boolean,
-    secondaryValue?: any,
+    secondaryValue?: unknown,
   ) => void;
   /**
    * Current active property path (e.g. "database/host").
@@ -121,7 +121,7 @@ export declare const SUPPORTED_FORMATS: readonly StructuredFormat[];
 export declare function parseStructuredValue(
   value: unknown,
   format?: StructuredFormat,
-): any;
+): unknown;
 export declare function stringifyStructuredValue(
   value: unknown,
   format?: StructuredFormat,

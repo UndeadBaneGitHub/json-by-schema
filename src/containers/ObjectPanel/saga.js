@@ -210,7 +210,7 @@ export function* updatePanels() {
           if (curChild.childPath) {
             // can't be: a non-existing child can't have yet another child
             stopExecution =
-              !propSchema && !{}.hasOwnProperty.call(config, propName);
+              !propSchema && !Object.hasOwn(config, propName);
           }
         }
 
@@ -275,9 +275,7 @@ export function* updatePanels() {
     );
 
     if (
-      !storedSchemaIndex ||
-      !storedSchemaIndex.equals ||
-      !storedSchemaIndex.equals(curLocationPart.schemaIndexes)
+      !storedSchemaIndex?.equals?.(curLocationPart.schemaIndexes)
     ) {
       yield put(
         selectSchema(curLocationPart.schemaIndexes, curLocationPart.path),
