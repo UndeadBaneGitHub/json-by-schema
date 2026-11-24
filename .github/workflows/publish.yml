@@ -1,13 +1,15 @@
 name: Publish to npm & Deploy GitHub Pages Demo
 
 on:
-  push:
-    tags:
-      - 'v*'
   release:
     types:
       - published
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Optional version override (e.g. 0.2.1 or 1.0.0)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -37,6 +39,13 @@ jobs:
           node-version: 22
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Sync package.json version with release tag or input
+        run: |
+          TARGET_VERSION="${{ github.event.inputs.version || github.event.release.tag_name }}"
+          if [ -n "$TARGET_VERSION" ]; then
+            npm version "$TARGET_VERSION" --no-git-tag-version --allow-same-version
+          fi
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
